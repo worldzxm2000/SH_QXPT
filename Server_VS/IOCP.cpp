@@ -13,6 +13,7 @@ using namespace std;
 
 IOCP::IOCP()
 {
+	int x = 10;
 	m_ThreadsCount = 0;
 }
 
