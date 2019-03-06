@@ -11,6 +11,7 @@
 #include<QRunnable>
 #include<QString>
 #include<QJsonObject>
+#include <mswsock.h> 
 class  IOCP:public QObject,public QRunnable
 {
 
@@ -30,6 +31,9 @@ public:
 	//获取服务端Socket号
 	int GetSocket();
 private:
+	//异步接收连接结构体
+	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
+	LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs;
 	//服务器端
 	SOCKET m_SrvSocket;
 	//存放Socket数组

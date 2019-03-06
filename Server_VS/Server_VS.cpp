@@ -31,6 +31,7 @@ Server_VS::Server_VS(QWidget *parent)
 	strOperateType = "未知操作";
 	ui.OnLineCountLabel->setText("当前在线设备个数：0");
 	ui.NameLabel->setText("白洋淀中心站 版本1.0");
+
 	//pool.setMaxThreadCount(1024);
 	addDockWidget(Qt::RightDockWidgetArea,ui.WarningDockWidget);
 	slModel = new QStringListModel();
@@ -306,6 +307,15 @@ void Server_VS::GetErrorMSG(int error)
 	QString strMSG;
 	switch (error)
 	{
+	case 10301:
+		strMSG = QString("WSA初始化失败！");
+		break;
+	case 10302:
+		strMSG = QString("Sokcet bind失败！");
+		break;
+	case 10303:
+		strMSG = QString("Socket listen失败！");
+		break;
 	case 10036:
 		strMSG = QString("Web监听端口异常");
 		break;
@@ -325,6 +335,7 @@ void Server_VS::GetErrorMSG(int error)
 		strMSG = QString::number(error);
 		break;
 	}
+	LogWrite::SYSLogMsgOutPut(strMSG);
 }
 
 //刷新设备ListCtrl控件
@@ -500,6 +511,7 @@ void Server_VS::OpenControlDlg()
 //	json.insert("Count", nCount);
 //	socket4web->SendToWebServiceSlot(json);
 //
+	
 	if (iSelectedRowOfClientListCtrl<0 || iSelectedRowOfClientListCtrl>ui.ClientList->rowCount() - 1)
 		return;
 

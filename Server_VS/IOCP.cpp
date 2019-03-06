@@ -33,17 +33,18 @@ void IOCP::Stop()
 		// 通知所有的完成端口操作退出  
 		result=PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
 	}
-	//断开socket连接
-	for (int i = 0; i < Sockets.count(); i++)
-	{
-		result = shutdown((SOCKET)Sockets.at(i), 2);//先关闭
-		result = closesocket(Sockets.at(i));//再断开
-	}
-	Sockets.clear();
+	////断开socket连接
+	//for (int i = 0; i < Sockets.count(); i++)
+	//{
+	//	result = shutdown((SOCKET)Sockets.at(i), 2);//先关闭
+	//	result = closesocket(Sockets.at(i));//再断开
+	//}
+	//Sockets.clear();
 	result = closesocket(m_SrvSocket);
 	WSACleanup();
 	LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务已关闭，端口号为：") + QString::number(m_Port));
 }
+
 
 void IOCP::run()
 {
@@ -52,25 +53,18 @@ void IOCP::run()
 	WSADATA wsaData;     // 接收Windows Socket的结构信息
 	if (WSAStartup(sockVersion, &wsaData) != 0)
 	{
-		ErrorMSGSignal(10300);
-	}
-	m_CompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-
-	if (NULL == m_CompletionPort)
-	{
 		ErrorMSGSignal(10301);
+		return;
 	}
-
-	PARAMS pparam;
-	pparam.CompletionPort = m_CompletionPort;
-	pparam.Parent = (HANDLE)this;
-
+	//创建完成端口
+	m_CompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+    //创建完成端口线程
 	SYSTEM_INFO mySysInfo;
 	GetSystemInfo(&mySysInfo);
 	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors*2);
 	for (int i = 0; i < m_ThreadsCount; ++i)
 	{
-		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, &pparam, 0, NULL);
+		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, (HANDLE)this, 0, NULL);
 		::ResumeThread(threadhandle);
 	}
 	//设置socket
@@ -84,28 +78,19 @@ void IOCP::run()
 	srvAddr.sin_family = AF_INET;
 	srvAddr.sin_port = htons(m_Port);
 	//绑定SOCKET到本机
-	int bindResult = ::bind(m_SrvSocket, (SOCKADDR*)&srvAddr, sizeof(SOCKADDR_IN));
-	if (SOCKET_ERROR == bindResult)
+	if (SOCKET_ERROR == ::bind(m_SrvSocket, (SOCKADDR*)&srvAddr, sizeof(SOCKADDR_IN)))
 	{
-		//Stop();
 		ErrorMSGSignal(10302);
 		return;
 	}
 	// 将SOCKET设置为监听模式
-	int listenResult = ::listen(m_SrvSocket, SOMAXCONN);
-	if (SOCKET_ERROR == listenResult)
+	if (SOCKET_ERROR == ::listen(m_SrvSocket, SOMAXCONN))
 	{
-		//Stop();
 		ErrorMSGSignal(10303);
 		return;
 	}
 
-	//LPFN_ACCEPTEX
-
-
-
-
-	//accept
+	//同步阻塞accept
 	while (1)
 	{
 		LPPER_HANDLE_DATA PerHandleData = new PER_HANDLE_DATA;;
@@ -113,25 +98,16 @@ void IOCP::run()
 		int RemoteLen = sizeof(saRemote);
 		//接收客户端连接
 		SOCKET acceptSocket;
-
 		//WSAID_ACCEPTEX
 		acceptSocket = accept(m_SrvSocket, (SOCKADDR*)&saRemote, &RemoteLen);
-		if (SOCKET_ERROR == (signed)acceptSocket)
-		{
-			// 接收客户端失败
-			ErrorMSGSignal(10311);
-			break;
-		}
-	
 		//客户端socket与IOCP关联
 		PerHandleData->Socket = acceptSocket;//Sccket号
 		PerHandleData->Port = saRemote.sin_port;//端口号
 		PerHandleData->Count = 0;//接收个数
         PerHandleData->ClientIP = inet_ntoa(saRemote.sin_addr);	//客户端IP
-
 		//客户端socket绑定IOCP
 		CreateIoCompletionPort((HANDLE)(PerHandleData->Socket), m_CompletionPort, (DWORD)PerHandleData, 0);
-		//客户端信息
+		//IO重叠
 		LPPER_IO_OPERATION_DATA PerIoData = NULL;
 		PerIoData = (LPPER_IO_OPERATION_DATA)GlobalAlloc(GPTR, sizeof(PER_IO_OPERATEION_DATA));
 		ZeroMemory(&(PerIoData->overlapped), sizeof(OVERLAPPED));
@@ -169,12 +145,25 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 			if (bRet== FALSE)
 			{
 				nError = GetLastError();
+				switch (nError)
+				{	
+				case 1236://服务器断开Socket连接
+				{
+					emit pIOCP->OffLineSignal(PerHandleData->Socket);
+					delete PerHandleData;
+					PerHandleData = NULL;
+				}
+					continue;
+				default:
+					continue;
+				}
 				if (IpOverlapped==NULL)
 				{
 					if (pIOCP != NULL)
 						LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务器监听线程意外断开！"));
 					break;
 				}
+
 			}
 			
 			PerIoData = (LPPER_IO_DATA)CONTAINING_RECORD(IpOverlapped, PER_IO_DATA, overlapped);
@@ -185,21 +174,11 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 				{
 					try
 					{
-						CancelIo((HANDLE)(PerHandleData->Socket));
+					//	CancelIo((HANDLE)(PerHandleData->Socket));
 						//更新UI客户端断开连接
 						emit pIOCP->OffLineSignal(PerHandleData->Socket);
-						//LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("端口号已断开：") + QString::number(pIOCP->m_Port) + QString::fromLocal8Bit("客户IP:") + PerHandleData->ClientIP);
-						//LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("台站号：") + PerHandleData->StationID + QString::fromLocal8Bit(",设备号：") + PerHandleData->DeviceID);
+					
 						closesocket(PerHandleData->Socket);
-						PerHandleData->Socket = INVALID_SOCKET;
-						/*	for (int i = pIOCP->Sockets.size(); i >-1; i--)
-						{
-						if (pIOCP->Sockets[i]==PerHandleData->Socket)
-						{
-						pIOCP->Sockets.removeAt(i);
-						break;
-						}
-						}*/
 						delete PerHandleData;
 						PerHandleData = NULL;
 						GlobalFree(PerIoData);
@@ -225,6 +204,7 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 			PerIoData->operationType = 0;
 			WSARecv(PerHandleData->Socket, &(PerIoData->databuff), 1, &RecvBytes, &Flags, &(PerIoData->overlapped), NULL);
 		}
+		
 		return 0;
 	}
 	catch (QString  exception)
