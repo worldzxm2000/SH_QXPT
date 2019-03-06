@@ -28,18 +28,19 @@ void IOCP::SetListenedPort(int Port,QString IP,int SrvID)
 void IOCP::Stop()
 {
 	int result = -1;
+	
 	for (int i = 0; i < m_ThreadsCount; i++)
 	{
 		// 通知所有的完成端口操作退出  
 		result=PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
 	}
-	////断开socket连接
-	//for (int i = 0; i < Sockets.count(); i++)
-	//{
-	//	result = shutdown((SOCKET)Sockets.at(i), 2);//先关闭
-	//	result = closesocket(Sockets.at(i));//再断开
-	//}
-	//Sockets.clear();
+	//断开socket连接
+	for (int i = 0; i < Sockets.count(); i++)
+	{
+	
+		result = closesocket(Sockets.at(i));//再断开
+	}
+	Sockets.clear();
 	result = closesocket(m_SrvSocket);
 	WSACleanup();
 	LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务已关闭，端口号为：") + QString::number(m_Port));
@@ -128,10 +129,9 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 {
 	try
 	{
-		LPPARAMS p = (LPPARAMS)pParam;
-		HANDLE m_CompletionPort = p->CompletionPort;
-		IOCP *pIOCP = (IOCP *)p->Parent;
+		IOCP *pIOCP = (IOCP *)pParam;
 		DWORD BytesTransferred = 0;
+		HANDLE m_CompletionPort = pIOCP->m_CompletionPort;
 		LPOVERLAPPED IpOverlapped;
 		LPPER_IO_DATA PerIoData = NULL;
 		LPPER_HANDLE_DATA PerHandleData = NULL;
