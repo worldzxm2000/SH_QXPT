@@ -943,15 +943,12 @@ void EHT::OpenCtrlWnd(QString StationID,QString DeviceID)
 		if (Clients[i].StationID.compare(StationID) == 0 &&
 			Clients[i].DeviceID.compare(DeviceID)==0)
 		{
-			int r=closesocket(Clients[i].SocketID);
-			r = WSAGetLastError();
-			/*if (StationID.toUpper().compare("NULL") == 0)
+			if (StationID.toUpper().compare("NULL")==0)
 			{
-				closesocket(Clients[i].SocketID);
 				func_GetControlWidget(DeviceID, Clients[i].SocketID, nullptr);
 				return;
 			}
-			func_GetControlWidget(StationID, Clients[i].SocketID, nullptr);*/
+			func_GetControlWidget(StationID, Clients[i].SocketID,nullptr);
 			return;
 		}
 		
