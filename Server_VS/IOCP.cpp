@@ -27,24 +27,25 @@ void IOCP::SetListenedPort(int Port,QString IP,int SrvID)
 
 void IOCP::Stop()
 {
-
+	int result = -1;
+	
 	for (int i = 0; i < m_ThreadsCount; i++)
 	{
 		// 通知所有的完成端口操作退出  
-		PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
+		result=PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
 	}
 	//断开socket连接
 	for (int i = 0; i < Sockets.count(); i++)
 	{
-	 shutdown((SOCKET)Sockets.at(i), 2);
-	 closesocket(Sockets.at(i));//再断开
+	
+		result = closesocket(Sockets.at(i));//再断开
 	}
 	Sockets.clear();
-	//关闭服务器Socket
-	closesocket(m_SrvSocket);
+	result = closesocket(m_SrvSocket);
 	WSACleanup();
 	LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务已关闭，端口号为：") + QString::number(m_Port));
 }
+
 
 void IOCP::run()
 {
@@ -53,74 +54,63 @@ void IOCP::run()
 	WSADATA wsaData;     // 接收Windows Socket的结构信息
 	if (WSAStartup(sockVersion, &wsaData) != 0)
 	{
-		ErrorMSGSignal(10300);
+		ErrorMSGSignal(10301);
 		return;
 	}
 	//创建完成端口
 	m_CompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-	//子线程获取IOCP类
-	PARAMS pparam;
-	pparam.CompletionPort = m_CompletionPort;
-	pparam.Parent = (HANDLE)this;
-	//创建完成端口处理线程
+    //创建完成端口线程
 	SYSTEM_INFO mySysInfo;
 	GetSystemInfo(&mySysInfo);
 	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors*2);
-
 	for (int i = 0; i < m_ThreadsCount; ++i)
 	{
-		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, &pparam, 0, NULL);
+		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, (HANDLE)this, 0, NULL);
 		::ResumeThread(threadhandle);
 	}
 	//设置socket
 	m_SrvSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN  srvAddr;
-	//设置服务器监听IP，端口
+	//获取本地IP
+	LPCSTR  ch;
 	QByteArray ba = m_IP.toLatin1();
-	LPCSTR  ch = ba.data();
+	ch = ba.data();
 	srvAddr.sin_addr.S_un.S_addr = inet_addr(ch);
 	srvAddr.sin_family = AF_INET;
 	srvAddr.sin_port = htons(m_Port);
 	//绑定SOCKET到本机
 	if (SOCKET_ERROR == ::bind(m_SrvSocket, (SOCKADDR*)&srvAddr, sizeof(SOCKADDR_IN)))
 	{
-		ErrorMSGSignal(10301);
+		ErrorMSGSignal(10302);
 		return;
 	}
 	// 将SOCKET设置为监听模式
 	if (SOCKET_ERROR == ::listen(m_SrvSocket, SOMAXCONN))
 	{
-		ErrorMSGSignal(10302);
+		ErrorMSGSignal(10303);
 		return;
 	}
-	//accept同步接收客户端连接
+
+	//同步阻塞accept
 	while (1)
 	{
-		//设置完成端口中结构体
-	
+		LPPER_HANDLE_DATA PerHandleData = new PER_HANDLE_DATA;;
 		SOCKADDR_IN saRemote;
 		int RemoteLen = sizeof(saRemote);
 		//接收客户端连接
 		SOCKET acceptSocket;
-
 		//WSAID_ACCEPTEX
 		acceptSocket = accept(m_SrvSocket, (SOCKADDR*)&saRemote, &RemoteLen);
-		if (SOCKET_ERROR == (signed)acceptSocket)
-		{
-			break;
-		}
 		//客户端socket与IOCP关联
-		LPPER_HANDLE_DATA PerHandleData = new PER_HANDLE_DATA;;
 		PerHandleData->Socket = acceptSocket;//Sccket号
 		PerHandleData->Port = saRemote.sin_port;//端口号
 		PerHandleData->Count = 0;//接收个数
         PerHandleData->ClientIP = inet_ntoa(saRemote.sin_addr);	//客户端IP
-
 		//客户端socket绑定IOCP
 		CreateIoCompletionPort((HANDLE)(PerHandleData->Socket), m_CompletionPort, (DWORD)PerHandleData, 0);
-		//IO重叠结构体
-		LPPER_IO_DATA PerIoData = NULL;
-		PerIoData = (LPPER_IO_DATA)GlobalAlloc(GPTR, sizeof(LPPER_IO_DATA));
+		//IO重叠
+		LPPER_IO_OPERATION_DATA PerIoData = NULL;
+		PerIoData = (LPPER_IO_OPERATION_DATA)GlobalAlloc(GPTR, sizeof(PER_IO_OPERATEION_DATA));
 		ZeroMemory(&(PerIoData->overlapped), sizeof(OVERLAPPED));
 		PerIoData->databuff.len = 4 * 1024;
 		PerIoData->databuff.buf = PerIoData->buffer;
@@ -139,37 +129,35 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 {
 	try
 	{
-
-		LPPARAMS p = (LPPARAMS)pParam;
-		HANDLE m_CompletionPort = p->CompletionPort;
-		IOCP *pIOCP = (IOCP *)p->Parent;
+		IOCP *pIOCP = (IOCP *)pParam;
 		DWORD BytesTransferred = 0;
+		HANDLE m_CompletionPort = pIOCP->m_CompletionPort;
 		LPOVERLAPPED IpOverlapped;
 		LPPER_IO_DATA PerIoData = NULL;
 		LPPER_HANDLE_DATA PerHandleData = NULL;
 		DWORD RecvBytes;
 		DWORD Flags = 0;
 		BOOL bRet = FALSE;
-		
+		int nError = -1;
 		while (1)
 		{
 			bRet = GetQueuedCompletionStatus(m_CompletionPort, &BytesTransferred, (PULONG_PTR)&PerHandleData, (LPOVERLAPPED*)&IpOverlapped, INFINITE);
 			if (bRet== FALSE)
 			{
-				int nError  = GetLastError();
+				nError = GetLastError();
 				switch (nError)
-				{
+				{	
 				case 1236://服务器断开Socket连接
 				{
 					emit pIOCP->OffLineSignal(PerHandleData->Socket);
 					delete PerHandleData;
 					PerHandleData = NULL;
 				}
-				continue;
+					continue;
 				default:
 					continue;
 				}
-				if (IpOverlapped == NULL)
+				if (IpOverlapped==NULL)
 				{
 					if (pIOCP != NULL)
 						LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务器监听线程意外断开！"));
@@ -186,21 +174,11 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 				{
 					try
 					{
-						CancelIo((HANDLE)(PerHandleData->Socket));
+					//	CancelIo((HANDLE)(PerHandleData->Socket));
 						//更新UI客户端断开连接
 						emit pIOCP->OffLineSignal(PerHandleData->Socket);
-						//LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("端口号已断开：") + QString::number(pIOCP->m_Port) + QString::fromLocal8Bit("客户IP:") + PerHandleData->ClientIP);
-						//LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("台站号：") + PerHandleData->StationID + QString::fromLocal8Bit(",设备号：") + PerHandleData->DeviceID);
+					
 						closesocket(PerHandleData->Socket);
-						PerHandleData->Socket = INVALID_SOCKET;
-						/*	for (int i = pIOCP->Sockets.size(); i >-1; i--)
-						{
-						if (pIOCP->Sockets[i]==PerHandleData->Socket)
-						{
-						pIOCP->Sockets.removeAt(i);
-						break;
-						}
-						}*/
 						delete PerHandleData;
 						PerHandleData = NULL;
 						GlobalFree(PerIoData);
@@ -216,7 +194,7 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 				break;
 			}
 			//线程处理函数
-		//   pIOCP->UnboxData(PerIoData, BytesTransferred, PerHandleData);
+		   pIOCP->UnboxData(PerIoData, BytesTransferred, PerHandleData);
 
 			//为下一个重叠调用建立IO操作
 			ZeroMemory(&(PerIoData->overlapped), sizeof(OVERLAPPED));
@@ -226,6 +204,7 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 			PerIoData->operationType = 0;
 			WSARecv(PerHandleData->Socket, &(PerIoData->databuff), 1, &RecvBytes, &Flags, &(PerIoData->overlapped), NULL);
 		}
+		
 		return 0;
 	}
 	catch (QString  exception)

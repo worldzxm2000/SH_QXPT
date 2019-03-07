@@ -20,6 +20,7 @@ WebCommServer g_WebCommServer;
 //构造函数
 Server_VS::Server_VS(QWidget *parent)
 	: QMainWindow(parent)
+	, m_dockWidget(nullptr)
 
 {
 	ui.setupUi(this);
@@ -30,13 +31,20 @@ Server_VS::Server_VS(QWidget *parent)
 	strOperateType = "未知操作";
 	ui.OnLineCountLabel->setText("当前在线设备个数：0");
 	ui.NameLabel->setText("白洋淀中心站 版本1.0");
-	//pool.setMaxThreadCount(1024);
 
+	//pool.setMaxThreadCount(1024);
+	addDockWidget(Qt::RightDockWidgetArea,ui.WarningDockWidget);
 	slModel = new QStringListModel();
 	slModel->setStringList(WarningInfoList);
 	strView = new QListView();
 	strView->setModel(slModel);
+	ui.WarningDockWidget->setWidget(strView);
+	addToolBarBreak();
 
+	createDockWidgetBar(Qt::LeftDockWidgetArea);
+	createDockWidgetBar(Qt::RightDockWidgetArea);
+	createDockWidgetBar(Qt::TopDockWidgetArea);
+	createDockWidgetBar(Qt::BottomDockWidgetArea);
 	//menu功能
 	connect(ui.action_SYSLog, SIGNAL(triggered()), this, SLOT(OpenSYSLog()));
 	connect(ui.action_DataLog, SIGNAL(triggered()), this, SLOT(OpenDataLog()));
@@ -299,8 +307,14 @@ void Server_VS::GetErrorMSG(int error)
 	QString strMSG;
 	switch (error)
 	{
-	case 10030:
-		strMSG = QString("WSA库类加载失败！"); 
+	case 10301:
+		strMSG = QString("WSA初始化失败！");
+		break;
+	case 10302:
+		strMSG = QString("Sokcet bind失败！");
+		break;
+	case 10303:
+		strMSG = QString("Socket listen失败！");
 		break;
 	case 10036:
 		strMSG = QString("Web监听端口异常");
@@ -321,6 +335,7 @@ void Server_VS::GetErrorMSG(int error)
 		strMSG = QString::number(error);
 		break;
 	}
+	LogWrite::SYSLogMsgOutPut(strMSG);
 }
 
 //刷新设备ListCtrl控件
@@ -496,6 +511,7 @@ void Server_VS::OpenControlDlg()
 //	json.insert("Count", nCount);
 //	socket4web->SendToWebServiceSlot(json);
 //
+	
 	if (iSelectedRowOfClientListCtrl<0 || iSelectedRowOfClientListCtrl>ui.ClientList->rowCount() - 1)
 		return;
 
@@ -511,7 +527,7 @@ void Server_VS:: ShowWarningDockWidget()
 {	
 	//读取WaningLog文件中报警信息
 	LoadWarningInfo();
-	
+	ui.WarningDockWidget->show();
 	ui.groupBox_SrvGB->setGeometry(QRect(940, 2, 75, 26));
 }
 
@@ -623,3 +639,397 @@ void Server_VS::record_sortbyclounm(int colum)
 		return;
 	ui.ClientList->sortItems(colum, Qt::AscendingOrder);
 }
+
+
+//Docking配置方法
+static
+Qt::ToolBarArea dockAreaToToolBarArea(Qt::DockWidgetArea area)
+{
+	switch (area)
+	{
+	case Qt::LeftDockWidgetArea: return Qt::LeftToolBarArea;
+	case Qt::RightDockWidgetArea: return Qt::RightToolBarArea;
+	case Qt::TopDockWidgetArea: return Qt::TopToolBarArea;
+	case Qt::BottomDockWidgetArea: return Qt::BottomToolBarArea;
+	default:
+		return Qt::ToolBarArea(0);
+	}
+}
+
+void Server_VS::createDockWidgetBar(Qt::DockWidgetArea area)
+{
+	if (m_dockWidgetBar.find(area) != std::end(m_dockWidgetBar)) {
+		return;
+	}
+
+	MyDockWidgetTabBar* dockWidgetBar = new MyDockWidgetTabBar(area);
+	m_dockWidgetBar[area] = dockWidgetBar;
+	connect(dockWidgetBar, &MyDockWidgetTabBar::signal_dockWidgetButton_clicked, this, &Server_VS::showDockWidget);
+
+	addToolBar(dockAreaToToolBarArea(area), dockWidgetBar);
+}
+
+void Server_VS::dockWidgetUnpinned(MyDockWidget* dockWidget)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+
+	MyDockWidgetTabBar* dockWidgetBar = getDockWidgetBar(dockWidget->getArea());
+	if (dockWidgetBar == nullptr) {
+		return;
+	}
+
+	QList<QDockWidget*> dockWidgetList = tabifiedDockWidgets(dockWidget);
+	dockWidgetList.push_back(dockWidget);
+
+	std::for_each(std::begin(dockWidgetList), std::end(dockWidgetList), [&](QDockWidget* qDockWidget)
+	{
+		MyDockWidget* dockWidget = static_cast<MyDockWidget*>(qDockWidget);
+
+		dockWidget->setState(DockWidgetState::Hidden);
+
+		if (!dockWidget->isHidden())
+		{
+			dockWidgetBar->addDockWidget(dockWidget);
+
+			dockWidget->setTabifiedDocks(dockWidgetList);
+
+			QMainWindow::removeDockWidget(dockWidget);
+		}
+	});
+
+	if (dockWidget->getArea() == Qt::LeftDockWidgetArea)
+	{
+		getDockWidgetBar(Qt::TopDockWidgetArea)->insertSpacing();
+		getDockWidgetBar(Qt::BottomDockWidgetArea)->insertSpacing();
+	}
+	if (dockWidget->getArea() == Qt::RightDockWidgetArea)
+	{
+		getDockWidgetBar(Qt::TopDockWidgetArea)->insertSpacing();
+		getDockWidgetBar(Qt::BottomDockWidgetArea)->insertSpacing();
+		ui.groupBox_SrvGB->setGeometry(QRect(1175, 2, 75, 26));
+	}
+}
+
+void Server_VS::dockWidgetPinned(MyDockWidget* dockWidget)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+
+	MyDockWidgetTabBar* dockWidgetBar = getDockWidgetBar(dockWidget->getArea());
+	if (dockWidgetBar == nullptr) {
+		return;
+	}
+
+	m_dockWidget = nullptr;
+
+	std::vector<MyDockWidget*> dockWidgetList = dockWidget->getTabifiedDocks();
+	dockWidgetList.push_back(dockWidget);
+
+	MyDockWidget* prevDockWidget = nullptr;
+
+	std::for_each(std::begin(dockWidgetList), std::end(dockWidgetList), [&](MyDockWidget* dockWidget)
+	{
+		if (dockWidgetBar->removeDockWidget(dockWidget))
+		{
+			if (prevDockWidget == nullptr) {
+				QMainWindow::addDockWidget(dockWidget->getArea(), dockWidget);
+			}
+			else {
+				tabifyDockWidget(prevDockWidget, dockWidget);
+			}
+
+			prevDockWidget = dockWidget;
+
+			dockWidget->setState(DockWidgetState::Docked);
+
+			dockWidget->show();
+		}
+	});
+
+	dockWidget->raise();
+
+	if ((dockWidget->getArea() == Qt::LeftDockWidgetArea) &&
+		dockWidgetBar->isHidden())
+	{
+		getDockWidgetBar(Qt::TopDockWidgetArea)->removeSpacing();
+		getDockWidgetBar(Qt::BottomDockWidgetArea)->removeSpacing();
+	}
+	if((dockWidget->getArea() == Qt::RightDockWidgetArea) &&
+		dockWidgetBar->isHidden())
+	{
+		ui.groupBox_SrvGB->setGeometry(QRect(935, 2, 75, 26));
+	}
+	
+}
+
+void Server_VS::showDockWidget(MyDockWidget* dockWidget)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+
+	if (dockWidget->isHidden())
+	{
+		hideDockWidget(m_dockWidget);
+
+		if (dockWidget->isFloating())
+		{
+			QMainWindow::addDockWidget(dockWidget->getArea(), dockWidget);
+			dockWidget->setFloating(false);
+
+			QMainWindow::removeDockWidget(dockWidget);
+		}
+
+		adjustDockWidget(dockWidget);
+		//读取WaningLog文件中报警信息
+		LoadWarningInfo();
+		dockWidget->show();
+		dockWidget->raise();
+
+		dockWidget->setFocus();
+
+		m_dockWidget = dockWidget;
+		ui.groupBox_SrvGB->setGeometry(QRect(915, 2, 75, 26));
+	}
+	else
+	{
+		hideDockWidget(dockWidget);
+		ui.groupBox_SrvGB->setGeometry(QRect(1170, 2, 75, 26));
+	}
+}
+
+bool Server_VS::event(QEvent* event)
+{
+	if (event->type() == QEvent::Resize)
+	{
+		hideDockWidget(m_dockWidget);
+	}
+
+	// Make sure the rest of events are handled
+	return QMainWindow::event(event);
+}
+
+void Server_VS::adjustDockWidget(MyDockWidget* dockWidget)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+
+	QRect rect = getDockWidgetsAreaRect();
+	switch (dockWidget->getArea())
+	{
+	case Qt::LeftDockWidgetArea: {
+		dockWidget->setGeometry(rect.left(), rect.top(), dockWidget->width(), rect.height());
+	}
+								 break;
+
+	case Qt::TopDockWidgetArea: {
+		dockWidget->setGeometry(rect.left(), rect.top(), rect.width(), dockWidget->height());
+	}
+								break;
+
+	case Qt::RightDockWidgetArea: {
+		ui.groupBox_SrvGB->setGeometry(QRect(915, 2, 75, 26));
+		dockWidget->setGeometry(rect.left() + rect.width() - dockWidget->width(), rect.top(), dockWidget->width(), rect.height());
+	}
+								  break;
+
+	case Qt::BottomDockWidgetArea: {
+		dockWidget->setGeometry(rect.left(), rect.top() + rect.height() - dockWidget->height(), rect.width(), dockWidget->height());
+	}
+								   break;
+	}
+}
+
+MyDockWidgetTabBar* Server_VS::getDockWidgetBar(Qt::DockWidgetArea area)
+{
+	assert(m_dockWidgetBar.find(area) != std::end(m_dockWidgetBar));
+
+	auto it = m_dockWidgetBar.find(area);
+	if (it != std::end(m_dockWidgetBar)) {
+		return it->second;
+	}
+
+	return nullptr;
+}
+
+void Server_VS::addDockWidget(Qt::DockWidgetArea area, MyDockWidget* dockWidget)
+{
+	addDockWidget(area, dockWidget, Qt::Vertical);
+}
+
+void Server_VS::addDockWidget(Qt::DockWidgetArea area, MyDockWidget* dockWidget, Qt::Orientation orientation)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+
+	connect(dockWidget, &MyDockWidget::signal_pinned, this, &Server_VS::dockWidgetPinned);
+	connect(dockWidget, &MyDockWidget::signal_unpinned, this, &Server_VS::dockWidgetUnpinned);
+	connect(dockWidget, &MyDockWidget::signal_docked, this, &Server_VS::dockWidgetDocked);
+	connect(dockWidget, &MyDockWidget::signal_undocked, this, &Server_VS::dockWidgetUndocked);
+	connect(dockWidget, &MyDockWidget::signal_close, this, &Server_VS::dockWidgetClose);
+	m_dockWidgets.push_back(dockWidget);
+
+	QMainWindow::addDockWidget(area, dockWidget, orientation);
+
+	QString title = dockWidget->windowTitle();
+	if (title.isEmpty()) {
+		title = QObject::tr("Noname");
+	}
+}
+
+void Server_VS::removeDockWidget(MyDockWidget* dockWidget)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+
+	auto it = std::find(m_dockWidgets.begin(), m_dockWidgets.end(), dockWidget);
+	if (it == m_dockWidgets.end()) {
+		return;
+	}
+
+	m_dockWidgets.erase(it);
+
+	if (dockWidget->isMinimized()) {
+		dockWidgetPinned(dockWidget);
+	}
+
+	QMainWindow::removeDockWidget(dockWidget);
+
+	dockWidget->setParent(nullptr);
+}
+
+void Server_VS::dockWidgetDocked(MyDockWidget* dockWidget)
+{
+	if (dockWidget == nullptr) {
+		return;
+	}
+}
+
+void Server_VS::dockWidgetClose(MyDockWidget* dockWidget)
+{
+    ui.groupBox_SrvGB->setGeometry(QRect(1200, 2, 75, 26));
+}
+
+void Server_VS::dockWidgetUndocked(MyDockWidget* dockWidget)
+{
+	hideDockWidget(m_dockWidget);
+
+	MyDockWidgetTabBar* dockWidgetBar = getDockWidgetBar(dockWidget->getArea());
+	if (dockWidgetBar == nullptr) {
+		return;
+	}
+
+	dockWidget->clearTabifiedDocks();
+
+	if (dockWidgetBar->removeDockWidget(dockWidget))
+	{
+		if (!dockWidget->isFloating()) {
+			QMainWindow::addDockWidget(dockWidget->getArea(), dockWidget);
+		}
+
+		if ((dockWidget->getArea() == Qt::LeftDockWidgetArea) &&
+			dockWidgetBar->isHidden())
+		{
+			getDockWidgetBar(Qt::TopDockWidgetArea)->removeSpacing();
+			getDockWidgetBar(Qt::BottomDockWidgetArea)->removeSpacing();
+		}
+
+		dockWidget->show();
+	}
+}
+
+std::list<MyDockWidget*> Server_VS::getDockWidgetListAtArea(Qt::DockWidgetArea area)
+{
+	std::list<MyDockWidget*> dockWidgetList;
+	std::copy_if(std::begin(m_dockWidgets), std::end(m_dockWidgets), std::back_inserter(dockWidgetList), [area](const MyDockWidget* dockWidget) {
+		return (dockWidget->getArea() == area) && (dockWidget->isDocked());
+	});
+
+	return dockWidgetList;
+}
+
+QRect Server_VS::getDockWidgetsAreaRect()
+{
+	int left = centralWidget()->x();
+	std::list<MyDockWidget*> leftAreaDockWidgets = getDockWidgetListAtArea(Qt::LeftDockWidgetArea);
+	std::for_each(std::begin(leftAreaDockWidgets), std::end(leftAreaDockWidgets), [&left](const MyDockWidget* dockWidget)
+	{
+		if ((dockWidget->x() >= 0) && (dockWidget->width() > 0)) {
+			left = std::min(left, dockWidget->x());
+		}
+	});
+
+	int top = centralWidget()->y();
+	std::list<MyDockWidget*> topAreaDockWidgets = getDockWidgetListAtArea(Qt::TopDockWidgetArea);
+	std::for_each(std::begin(topAreaDockWidgets), std::end(topAreaDockWidgets), [&top](const MyDockWidget* dockWidget)
+	{
+		if ((dockWidget->y() >= 0) && (dockWidget->height() > 0)) {
+			top = std::min(top, dockWidget->y());
+		}
+	});
+
+	int right = centralWidget()->x() + centralWidget()->width();
+	std::list<MyDockWidget*> rightAreaDockWidgets = getDockWidgetListAtArea(Qt::RightDockWidgetArea);
+	std::for_each(std::begin(rightAreaDockWidgets), std::end(rightAreaDockWidgets), [&right](const MyDockWidget* dockWidget)
+	{
+		if ((dockWidget->x() >= 0) && (dockWidget->width() > 0)) {
+			right = std::max(right, dockWidget->x() + dockWidget->width());
+		}
+	});
+
+	int bottom = centralWidget()->y() + centralWidget()->height();
+	std::list<MyDockWidget*> bottomAreaDockWidgets = getDockWidgetListAtArea(Qt::BottomDockWidgetArea);
+	std::for_each(std::begin(bottomAreaDockWidgets), std::end(bottomAreaDockWidgets), [&bottom](const MyDockWidget* dockWidget)
+	{
+		if ((dockWidget->y() >= 0) && (dockWidget->height() > 0)) {
+			bottom = std::max(bottom, dockWidget->y() + dockWidget->height());
+		}
+	});
+
+	return QRect(left, top, right - left, bottom - top);
+}
+
+void Server_VS::hideDockWidget(MyDockWidget* dockWidget)
+{
+	if ((dockWidget == nullptr) || (dockWidget->isHidden())) {
+		return;
+	}
+
+	m_dockWidget = nullptr;
+	WarningInfoList.clear();
+	dockWidget->hide();
+}
+
+void Server_VS::menuWindows_triggered(QAction* action)
+{
+	auto it = std::find_if(m_dockWidgets.begin(), m_dockWidgets.end(), [&](MyDockWidget* dockWidget) {
+		return (dockWidget->getMenuAction() == action);
+	});
+	if (it == m_dockWidgets.end()) {
+		return;
+	}
+
+	MyDockWidget* dockWidget = *it;
+	if (dockWidget->isHidden())
+	{
+		hideDockWidget(m_dockWidget);
+
+		dockWidget->show();
+		dockWidget->raise();
+
+		// dockWidget->setState(DockWidgetState::Docked);
+	}
+	else if (dockWidget->isMinimized())
+	{
+		showDockWidget(dockWidget);
+	}
+
+	dockWidget->setFocus();
+}
+
