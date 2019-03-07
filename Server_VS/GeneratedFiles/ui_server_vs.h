@@ -23,6 +23,7 @@
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QWidget>
 #include"SrvTableWidget.h"
+#include"MyDockWidget.h"
 #include"MyButton.h"
 QT_BEGIN_NAMESPACE
 
@@ -77,6 +78,7 @@ public:
 	QScrollArea *ScrollArea_WarningBtn;
 	QWidget *ScrollAreaWidgetContents_WarningBtn;
 	MyButton *WarningBtn;
+	MyDockWidget *WarningDockWidget;
 
 	void setupUi(QMainWindow *Server_VSClass)
 	{
@@ -264,6 +266,10 @@ public:
 		WarningBtn->setGeometry(QRect(1, 1, 16, 16));
 		ScrollArea_WarningBtn->setWidget(ScrollAreaWidgetContents_WarningBtn);
 		Server_VSClass->setCentralWidget(centralWidget);
+		WarningDockWidget = new MyDockWidget(QString("±¨¾¯ÐÅÏ¢"));
+		WarningDockWidget->setGeometry(1100, 40, 40, 600);
+		WarningDockWidget->setStyleSheet("QWidget{background:rgb(100,100,100);color:white}QToolTip { color: white; background-color:rgb(77,77,77); border: none;}");
+
 
 		retranslateUi(Server_VSClass);
 
