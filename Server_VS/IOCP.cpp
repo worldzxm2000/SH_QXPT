@@ -101,6 +101,11 @@ void IOCP::run()
 		SOCKET acceptSocket;
 		//WSAID_ACCEPTEX
 		acceptSocket = accept(m_SrvSocket, (SOCKADDR*)&saRemote, &RemoteLen);
+		if (SOCKET_ERROR == acceptSocket) {	// 接收客户端失败
+			
+			return ;
+		}
+
 		//客户端socket与IOCP关联
 		PerHandleData->Socket = acceptSocket;//Sccket号
 		PerHandleData->Port = saRemote.sin_port;//端口号
