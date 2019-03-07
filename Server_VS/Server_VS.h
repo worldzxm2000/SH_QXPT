@@ -17,9 +17,7 @@
 #include<QListView>
 #include<QStringListModel>
 #include<assert.h>
-#include"MyDockWidget.h"
-#include"MyDockWidgetTabBar.h"
-#include"MyDockWidgetTabButton.h"
+
 #include"ControlDlg.h"
 //业务类型连接信息
 typedef struct
@@ -45,25 +43,7 @@ typedef struct
 	//业务下连接socket的IP号和端口号
 	vector<CLIENTINFO> clients;
 } Facility, *LPFacility;
-inline Qt::Orientation areaToOrientation(Qt::DockWidgetArea area)
-{
-	assert((area == Qt::LeftDockWidgetArea) || (area == Qt::RightDockWidgetArea) ||
-		(area == Qt::TopDockWidgetArea) || (area == Qt::BottomDockWidgetArea));
 
-	switch (area)
-	{
-	case Qt::LeftDockWidgetArea:
-	case Qt::RightDockWidgetArea:
-		return Qt::Vertical;
-	case Qt::TopDockWidgetArea:
-	case Qt::BottomDockWidgetArea:
-		return Qt::Horizontal;
-	default:
-		return Qt::Orientation(0);
-	}
-}
-class MyDockWidget;
-class MyDockWidgetTabBar;
 class Server_VS : public QMainWindow
 {
 	Q_OBJECT
@@ -102,15 +82,6 @@ private:;
 	void HighlightRow(QString ServiceName);
 private:
 	Ui::Server_VSClass ui;
-	MyDockWidget* m_dockWidget;
-
-	/*! List of all created dockwidgets
-	*/
-	std::list<MyDockWidget*> m_dockWidgets;
-
-	/*! List of 4 dock tabbars
-	*/
-	std::map<Qt::DockWidgetArea, MyDockWidgetTabBar*> m_dockWidgetBar;
 	//业务类型数组
 	EHTPool EHTPool;
 	//UPD线程
@@ -215,41 +186,6 @@ private slots:
 	void ClientList_cuurentItemChanged(QTableWidgetItem * current, QTableWidgetItem * previous);
 	//列表排序
 	void record_sortbyclounm(int colum);
-//Docking配置
-	public:
-		void addDockWidget(Qt::DockWidgetArea area, MyDockWidget* dockWidget);
-		void addDockWidget(Qt::DockWidgetArea area, MyDockWidget* dockWidget, Qt::Orientation orientation);
-		void removeDockWidget(MyDockWidget* dockWidget);
-
-private:
-	void hideDockWidget(MyDockWidget* dockWidget);
-
-	QRect getDockWidgetsAreaRect();
-
-	void adjustDockWidget(MyDockWidget* dockWidget);
-	MyDockWidgetTabBar* getDockWidgetBar(Qt::DockWidgetArea area);
-	std::list<MyDockWidget*> getDockWidgetListAtArea(Qt::DockWidgetArea area);
-	void createDockWidgetBar(Qt::DockWidgetArea area);
-
-	void showDockWidget(MyDockWidget* dockWidget);
-
-	// Turn on the AutoHide option 
-	void dockWidgetPinned(MyDockWidget* dockWidget);
-
-	// Turn off the AutoHide option 
-	void dockWidgetUnpinned(MyDockWidget* dockWidget);
-
-	// DockWidget has been docked
-	void dockWidgetDocked(MyDockWidget* dockWidget);
-	//Close Widget
-	void dockWidgetClose(MyDockWidget* dockWidget);
-	// DockWidget has been undocked
-	void dockWidgetUndocked(MyDockWidget* dockWidget);
-
-	void menuWindows_triggered(QAction* action);
-	protected:
-		virtual bool event(QEvent* event) override;
-
 };
 
 #endif // SERVER_VS_H
