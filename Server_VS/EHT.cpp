@@ -63,10 +63,11 @@ LRESULT EHT::LoadLib(QString Lib_Path, bool isLoad)
 		GetPort_Lib func_GetPort = (GetPort_Lib)m_Lib.resolve("GetPort");//获取端口号
 		GetVersionNo_Lib func_GetVersionNo = (GetVersionNo_Lib)m_Lib.resolve("GetVersionNo");//获取版本号
 		Char2Json func_Char2Json = (Char2Json)(m_Lib.resolve("Char2Json"));//获取解析数据
-		func_SetTime_Lib = (SetTime_Lib)(m_Lib.resolve("SetTime"));
-		func_GetControlWidget = (GetControlWidget_Lib)(m_Lib.resolve("GetControlWidget"));
-		func_SetValueToControlWidget = (SetValueToControlWidget_Lib)(m_Lib.resolve("SetValueToControlWidget"));
-		func_SetCommand = (SetCommand_Lib)(m_Lib.resolve("SetCommand"));
+		func_SetTime_Lib = (SetTime_Lib)(m_Lib.resolve("SetTime"));//获取对时
+		func_GetControlWidget = (GetControlWidget_Lib)(m_Lib.resolve("GetControlWidget"));//获取窗体控制
+		func_SetValueToControlWidget = (SetValueToControlWidget_Lib)(m_Lib.resolve("SetValueToControlWidget"));//获取返回值
+		func_SetCommand = (SetCommand_Lib)(m_Lib.resolve("SetCommand"));//获取设置命令
+		func_CloseControlWindow = (CloseControlWindow)(m_Lib.resolve("CloseControlWindow"));//获取关闭控制窗体
 		if (!(func_GetServiceTypeID && func_GetServiceTypeName && func_GetVersionNo && 
 			func_GetPort&&func_Char2Json&&func_SetTime_Lib&&func_GetControlWidget&&func_SetCommand&&func_SetValueToControlWidget))
 		{
@@ -181,6 +182,7 @@ bool EHT::Run(QThreadPool &ThreadPool)
 	}
 	
 	pIOCP->func_Char2Json = (Char2Json)m_Lib.resolve("Char2Json");
+	pIOCP->func_GetFacilityInfo= (GetFacilityInfo)m_Lib.resolve("GetFacilityInfo");
 	m_DataFunc= (Char2Json)m_Lib.resolve("Char2Json");
 	pIOCP->SetListenedPort(m_Port, m_IP,m_ServiceID);
 	ThreadPool.start(pIOCP);
@@ -193,7 +195,10 @@ bool EHT::Stop()
 {
 	if (pIOCP != nullptr)
 		//关闭IOCP
+	{
 		pIOCP->Stop();
+		func_CloseControlWindow();
+	}
 	UnloadLib();
 	m_IsRun = false;
 	pIOCP = nullptr;
@@ -943,15 +948,13 @@ void EHT::OpenCtrlWnd(QString StationID,QString DeviceID)
 		if (Clients[i].StationID.compare(StationID) == 0 &&
 			Clients[i].DeviceID.compare(DeviceID)==0)
 		{
-			int r=closesocket(Clients[i].SocketID);
-			r = WSAGetLastError();
-			/*if (StationID.toUpper().compare("NULL") == 0)
+			if (StationID.toUpper().compare("NULL") == 0)
 			{
 				closesocket(Clients[i].SocketID);
 				func_GetControlWidget(DeviceID, Clients[i].SocketID, nullptr);
 				return;
 			}
-			func_GetControlWidget(StationID, Clients[i].SocketID, nullptr);*/
+			func_GetControlWidget(StationID, Clients[i].SocketID, nullptr);
 			return;
 		}
 		

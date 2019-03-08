@@ -12,6 +12,7 @@
 #include<QString>
 #include<QJsonObject>
 #include <mswsock.h> 
+#include<QTimer>
 class  IOCP:public QObject,public QRunnable
 {
 
@@ -56,6 +57,11 @@ private:
 	QString m_IP;
 	//业务ID
 	int m_SrvID;
+	//获取设备信息超时处理
+	int m_TimeOutTimerID;
+	void timerEvent(QTimerEvent * event);
+	//删除连接资源
+	void ReleaseSocket(LPPER_HANDLE_DATA &lpPerhandleData);
     //信号量
 signals:
 	void WebCommandSignal();

@@ -109,6 +109,8 @@ private:
 	SetValueToControlWidget_Lib func_SetValueToControlWidget;
 	//终端命令
 	SetCommand_Lib func_SetCommand;
+	//关闭控制窗体
+	CloseControlWindow func_CloseControlWindow;
 	//路径
 	QString m_LibPath;
 	//UDP连接池

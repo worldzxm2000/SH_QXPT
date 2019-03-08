@@ -16,6 +16,7 @@ typedef void(*SetTime_Lib)(QString StationID, uint Socket);//对时命令
 typedef void(*SetCommand_Lib)(uint Socket, int CommandType,QString Params1,QString Params2,QString StationID);//终端命令
 typedef void(*SetValueToControlWidget_Lib)(QStringList ValueList);//返回值
 typedef void(*GetFacilityInfo)(uint Socket);//获取台站信息
+typedef void(*CloseControlWindow)();//关闭控制窗体
 extern 	SimpleProducer g_SimpleProducer, g_SimpleProducer_ZDH,g_SimpleProducer_Command;
 extern WebCommServer g_WebCommServer ;
 const int DataBuffSize = 4 * 1024;
@@ -49,6 +50,7 @@ typedef struct
 	QString Frame;//一帧数据
 	QString StationID;//台站号
 	QString DeviceID;//设备号
+	int Timer;//超时时钟标识
 }PER_HANDLE_DATA, *LPPER_HANDLE_DATA;
 
 //业务列表
