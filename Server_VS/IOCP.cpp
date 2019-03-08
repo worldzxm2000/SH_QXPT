@@ -42,7 +42,7 @@ void IOCP::Stop()
 		result = closesocket(Sockets.at(i)->Socket);
 	}
 
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < m_ThreadsCount; i++)
 	{
 		// 通知所有的完成端口操作退出  
 		result = PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
@@ -71,7 +71,7 @@ void IOCP::run()
 	SYSTEM_INFO mySysInfo;
 	GetSystemInfo(&mySysInfo);
 	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors * 2);
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < m_ThreadsCount; ++i)
 	{
 		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, (HANDLE)this, 0, NULL);
 		::ResumeThread(threadhandle);
