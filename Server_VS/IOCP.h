@@ -20,7 +20,7 @@ class  IOCP:public QObject,public QRunnable
 public:
     IOCP();
     ~IOCP();
-	Char2Json func_Char2Json;
+
 protected:
     void run();
 public:
@@ -30,6 +30,10 @@ public:
 	void Stop();
 	//获取服务端Socket号
 	int GetSocket();
+	//数据解析
+	Char2Json func_Char2Json;
+	//获取设备信息
+	GetFacilityInfo func_GetFacilityInfo;
 private:
 	//异步接收连接结构体
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
@@ -37,7 +41,7 @@ private:
 	//服务器端
 	SOCKET m_SrvSocket;
 	//存放Socket数组
-	QVector<SOCKET> Sockets;
+	QVector<LPPER_HANDLE_DATA> Sockets;
 	//创建完成端口号
 	HANDLE m_CompletionPort;
 	//创建线程个数
@@ -45,7 +49,7 @@ private:
     //IOCP处理线程
     static unsigned __stdcall ServerWorkThread(LPVOID pParam);
     //处理设备发送数据
-    void UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA PerHandleData);
+    void DoRecvData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA PerHandleData);
     // 端口号
     int m_Port;
 	//IP

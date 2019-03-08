@@ -9,6 +9,9 @@
 #include<qdir.h>
 #include <mswsock.h> 
 #include <QDebug>
+#define SEND 0
+#define RECV 1
+
 using namespace std;
 
 IOCP::IOCP()
@@ -16,9 +19,9 @@ IOCP::IOCP()
 	m_ThreadsCount = 0;
 }
 
-IOCP::~IOCP(){}
+IOCP::~IOCP() {}
 
-void IOCP::SetListenedPort(int Port,QString IP,int SrvID)
+void IOCP::SetListenedPort(int Port, QString IP, int SrvID)
 {
 	this->m_Port = Port;
 	this->m_IP = IP;
@@ -28,18 +31,18 @@ void IOCP::SetListenedPort(int Port,QString IP,int SrvID)
 void IOCP::Stop()
 {
 	int result = -1;
-	
-	for (int i = 0; i < m_ThreadsCount; i++)
-	{
-		// 通知所有的完成端口操作退出  
-		result=PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
-	}
 	//断开socket连接
 	for (int i = 0; i < Sockets.count(); i++)
 	{
-	
-		result = closesocket(Sockets.at(i));//再断开
+		result = closesocket(Sockets.at(i)->Socket);//再断开
 	}
+
+	for (int i = 0; i < 1; i++)
+	{
+		// 通知所有的完成端口操作退出  
+		result = PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
+	}
+	
 	Sockets.clear();
 	result = closesocket(m_SrvSocket);
 	WSACleanup();
@@ -59,11 +62,11 @@ void IOCP::run()
 	}
 	//创建完成端口
 	m_CompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-    //创建完成端口线程
+	//创建完成端口线程
 	SYSTEM_INFO mySysInfo;
 	GetSystemInfo(&mySysInfo);
-	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors*2);
-	for (int i = 0; i < m_ThreadsCount; ++i)
+	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors * 2);
+	for (int i = 0; i < 1; ++i)
 	{
 		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, (HANDLE)this, 0, NULL);
 		::ResumeThread(threadhandle);
@@ -101,30 +104,35 @@ void IOCP::run()
 		SOCKET acceptSocket;
 		//WSAID_ACCEPTEX
 		acceptSocket = accept(m_SrvSocket, (SOCKADDR*)&saRemote, &RemoteLen);
-		if (SOCKET_ERROR == acceptSocket) {	// 接收客户端失败
-			
-			return ;
+		if (SOCKET_ERROR == acceptSocket)
+			// 接收失败或者关闭
+		{
+			break;
 		}
 
 		//客户端socket与IOCP关联
 		PerHandleData->Socket = acceptSocket;//Sccket号
 		PerHandleData->Port = saRemote.sin_port;//端口号
 		PerHandleData->Count = 0;//接收个数
-        PerHandleData->ClientIP = inet_ntoa(saRemote.sin_addr);	//客户端IP
+		PerHandleData->ClientIP = inet_ntoa(saRemote.sin_addr);	//客户端IP
 		//客户端socket绑定IOCP
 		CreateIoCompletionPort((HANDLE)(PerHandleData->Socket), m_CompletionPort, (DWORD)PerHandleData, 0);
 		//IO重叠
-		LPPER_IO_OPERATION_DATA PerIoData = NULL;
-		PerIoData = (LPPER_IO_OPERATION_DATA)GlobalAlloc(GPTR, sizeof(PER_IO_OPERATEION_DATA));
+		LPPER_IO_DATA PerIoData = NULL;
+		PerIoData = (LPPER_IO_DATA)GlobalAlloc(GPTR, sizeof(PER_IO_DATA));
 		ZeroMemory(&(PerIoData->overlapped), sizeof(OVERLAPPED));
 		PerIoData->databuff.len = 4 * 1024;
 		PerIoData->databuff.buf = PerIoData->buffer;
-		PerIoData->operationType = 0;
+		PerIoData->operationType = RECV;
 
 		//客户端socket添加入客户端数组，通知主程序
-		Sockets.push_back(acceptSocket);
+		Sockets.push_back(PerHandleData);
+		//获取设备信息,判断连接是否为设备
+		//func_GetFacilityInfo(acceptSocket);
+
 		DWORD RecvBytes = 0;
 		DWORD Flags = 0;
+		//接收数据
 		WSARecv(PerHandleData->Socket, &(PerIoData->databuff), 1, &RecvBytes, &Flags, &(PerIoData->overlapped), NULL);
 	}
 }
@@ -143,64 +151,91 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 		DWORD RecvBytes;
 		DWORD Flags = 0;
 		BOOL bRet = FALSE;
-		int nError = -1;
+		DWORD error = 0;
 		while (1)
 		{
 			bRet = GetQueuedCompletionStatus(m_CompletionPort, &BytesTransferred, (PULONG_PTR)&PerHandleData, (LPOVERLAPPED*)&IpOverlapped, INFINITE);
-			if (bRet== FALSE)
+			//GetQueuedCompletionStatus 返回值 false
+			if (bRet == FALSE)
 			{
-				nError = GetLastError();
-				switch (nError)
-				{	
-				case 1236://服务器断开Socket连接
+
+				if (NULL == IpOverlapped)
+					/*	If *lpOverlapped is NULL and the function does not dequeue a completion packet from the completion port,the return value is zero.
+						The function does not store information in the variables pointed to by the lpNumberOfBytesTransferred and lpCompletionKey parameters.
+						To get extended error information, call GetLastError.If the function did not dequeue a completion packet because the wait timed out, GetLastError returns WAIT_TIMEOUT.
+						如果 *lpOverlapped为空并且函数没有从完成端口取出完成包，返回值则为0。
+						函数则不会在lpNumberOfBytes and lpCompletionKey所指向的参数中存储信息。
+						调用GetLastError可以得到一个扩展错误信息。
+						如果函数由于等待超时而未能出列完成包，GetLastError返回WAIT_TIMEOUT.   */
 				{
-					emit pIOCP->OffLineSignal(PerHandleData->Socket);
-					delete PerHandleData;
-					PerHandleData = NULL;
-				}
-					continue;
-				default:
+					error = GetLastError();
+					LogWrite::SYSLogMsgOutPut("iocp has bug at 168,error msg is "+QString::number(error));
 					continue;
 				}
-				if (IpOverlapped==NULL)
+				//IpOverlapped != NULL
+				if (PerHandleData == NULL)
 				{
-					if (pIOCP != NULL)
-						LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务器监听线程意外断开！"));
-					break;
+					continue;
+				}
+				else
+				{
+				/*  If *lpOverlapped is not NULL and the function dequeues a completion packet for a failed I / O operation from the completion port, the return value is zero.
+					The function stores information in the variables pointed to by lpNumberOfBytesTransferred, lpCompletionKey, and lpOverlapped.
+					To get extended error information, call GetLastError
+					如果 *lpOverlapped不为空并且函数从完成端口出列一个失败I / O操作的完成包，返回值为0。
+					函数在指向lpNumberOfBytesTransferred, lpCompletionKey, and lpOverlapped的参数指针中存储相关信息。
+					调用GetLastError可以得到扩展错误信息 。
+					If a socket handle associated with a completion port is closed, GetQueuedCompletionStatus returns ERROR_SUCCESS, with lpNumberOfBytes equal zero.
+					如果关联到一个完成端口的一个socket句柄被关闭了，则GetQueuedCompletionStatus返回ERROR_SUCCESS（也是0）, 并且lpNumberOfBytes等于0  */
+
+					//释放掉资源（服务器主动断开触发）
+					if (NULL != pIOCP)
+					{
+						emit pIOCP->OffLineSignal(PerHandleData->Socket);
+						delete PerHandleData;
+						PerHandleData = NULL;
+					}
+					continue;
 				}
 
 			}
-			
-			PerIoData = (LPPER_IO_DATA)CONTAINING_RECORD(IpOverlapped, PER_IO_DATA, overlapped);
-			if (0 == BytesTransferred)
+			//GetQueuedCompletionStatus 返回值 true
+			else
 			{
-				//客户端主动断开连接
-				if (PerHandleData != NULL)
+				//这个宏的作用是：根据一个结构体实例中的成员的地址，取到整个结构体实例的地址
+				//PER_IO_DATA的成员overlapped的地址为&IpOverlapped，结果就可以获得PER_IO_DATA的地址
+				PerIoData = (LPPER_IO_DATA)CONTAINING_RECORD(IpOverlapped, PER_IO_DATA, overlapped);
+				if (NULL == PerIoData)
+					//关闭了服务器监听，直接退出IOCP子线程
 				{
-					try
+					break;
+				}
+				
+				// 检查在套接字上是否有错误发生
+				if (0 == BytesTransferred && RECV!= PerIoData->operationType)
+				{
+					//释放掉资源（设备主动断开连接触发）
+					if (NULL != pIOCP)
 					{
-					//	CancelIo((HANDLE)(PerHandleData->Socket));
-						//更新UI客户端断开连接
 						emit pIOCP->OffLineSignal(PerHandleData->Socket);
-					
 						closesocket(PerHandleData->Socket);
 						delete PerHandleData;
 						PerHandleData = NULL;
 						GlobalFree(PerIoData);
-						continue;
 					}
-					catch (const std::exception& e)
-					{
-						LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("台站号：") + PerHandleData->StationID + QString::fromLocal8Bit(",设备号：") + PerHandleData->DeviceID);
-						continue;
-					}
-				 
+					continue;
 				}
-				break;
-			}
-			//线程处理函数
-		   pIOCP->UnboxData(PerIoData, BytesTransferred, PerHandleData);
+				else
+				{
+				/*	If the function dequeues a completion packet for a successful I / O operation from the completion port, the return value is nonzero.
+					The function stores information in the variables pointed to by the lpNumberOfBytesTransferred, lpCompletionKey, and lpOverlapped parameters.
+					如果函数从完成端口取出一个成功I / O操作的完成包，返回值为非0。
+					函数在指向lpNumberOfBytesTransferred, lpCompletionKey, and lpOverlapped的参数中存储相关信息。*/
 
+					//线程处理函数，处理设备发送数据
+					pIOCP->DoRecvData(PerIoData, BytesTransferred, PerHandleData);
+				}
+			}
 			//为下一个重叠调用建立IO操作
 			ZeroMemory(&(PerIoData->overlapped), sizeof(OVERLAPPED));
 			memset(PerIoData->buffer, 0, 4 * 1024);
@@ -209,7 +244,7 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 			PerIoData->operationType = 0;
 			WSARecv(PerHandleData->Socket, &(PerIoData->databuff), 1, &RecvBytes, &Flags, &(PerIoData->overlapped), NULL);
 		}
-		
+
 		return 0;
 	}
 	catch (QString  exception)
@@ -220,14 +255,14 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 }
 
 //接收处理数据
-void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA PerHandleData)
+void IOCP::DoRecvData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA PerHandleData)
 {
 	try
 	{
 		//接收封装统一的Json
 		QJsonObject JsonObj;
 		//单次接收的数据
-		QString RecvStr = QString(QLatin1String(perIOData->buffer,len));
+		QString RecvStr = QString(QLatin1String(perIOData->buffer, len));
 		//去除多余符号
 		RecvStr = RecvStr.trimmed();
 		PerHandleData->Frame += RecvStr;
@@ -248,11 +283,11 @@ void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Per
 			return;
 		}
 		///**************************解析动态链接库***********************************
-	pResult = func_Char2Json(PerHandleData->Frame,JsonObj);
+		pResult = func_Char2Json(PerHandleData->Frame, JsonObj);
 		//判断接收情况
 		switch (pResult)
 		{
-		//1：解析成功
+			//1：解析成功
 		case 1:
 		{
 			//接收到数据个数
@@ -321,14 +356,14 @@ void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Per
 					case 1:
 					{
 						QString Value = data_json.find("RecvValue1").value().toString();
-						emit OperationResultSignal(Value,m_Port,PerHandleData->StationID,PerHandleData->DeviceID);
+						emit OperationResultSignal(Value, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
 						break;
 					}
 					case 2:
 					{
 						QString Value1 = data_json.find("RecvValue1").value().toString();
 						QString Value2 = data_json.find("RecvValue2").value().toString();
-						emit OperationResultSignal(Value1,Value2, m_Port, PerHandleData->StationID,PerHandleData->DeviceID);
+						emit OperationResultSignal(Value1, Value2, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
 						break;
 					}
 					case 5://农田小气候和水质 
@@ -352,19 +387,19 @@ void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Per
 						QString Value2 = data_json.find("RecvValue2").value().toString();
 						QString Value3 = data_json.find("RecvValue3").value().toString();
 						QString Value4 = data_json.find("RecvValue4").value().toString();
-						emit OperationResultSignal(Command,Value1,Value2,Value3,Value4, m_Port,PerHandleData->StationID,PerHandleData->DeviceID);
+						emit OperationResultSignal(Command, Value1, Value2, Value3, Value4, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
 						break;
 					}
 					case 8://便携式
 					{
-				
+
 						emit OperationResultSignal(data_json, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
 						break;
 					}
 					default:
 						break;
 					}
-				
+
 				}
 				break;
 				case 3://心跳数据
@@ -382,15 +417,15 @@ void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Per
 						QString current_date = current_date_time.toString("yyyy-MM-dd hh24:mm:ss");
 						HBJson.insert("HBTime", current_date);
 						HBJson.insert("OnLineStatus",true);*/
-						QJsonDocument document;
-						document.setObject(data_json);
-						QByteArray byteArray = document.toJson(QJsonDocument::Compact);
-						LPCSTR dataChar;
-						dataChar = byteArray.data();
-						//发送至消息中间件
-					//	if (g_SimpleProducer_sh.send(dataChar, strlen(dataChar)) < 0)
-						//	emit ErrorMSGSignal(10304);
-				//	}
+					QJsonDocument document;
+					document.setObject(data_json);
+					QByteArray byteArray = document.toJson(QJsonDocument::Compact);
+					LPCSTR dataChar;
+					dataChar = byteArray.data();
+					//发送至消息中间件
+				//	if (g_SimpleProducer_sh.send(dataChar, strlen(dataChar)) < 0)
+					//	emit ErrorMSGSignal(10304);
+			//	}
 					emit NewDataSignal(
 						PerHandleData->StationID,
 						PerHandleData->ClientIP,
@@ -405,7 +440,7 @@ void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Per
 			break;
 		}
 		default://-1：表示未知数据
-			LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("台站号")+PerHandleData->StationID+QString::fromLocal8Bit("意外的接收字节:")+ PerHandleData->Frame);
+			LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("台站号") + PerHandleData->StationID + QString::fromLocal8Bit("意外的接收字节:") + PerHandleData->Frame);
 			break;
 		}
 	}
@@ -414,10 +449,10 @@ void IOCP::UnboxData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Per
 		LogWrite::SYSLogMsgOutPut("解析数据发生异常错误!");
 		return;
 	}
-		
+
 }
 
-int IOCP:: GetSocket()
+int IOCP::GetSocket()
 {
 	return m_SrvSocket;
 }
