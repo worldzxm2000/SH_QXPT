@@ -45,7 +45,7 @@ public:
     {
         if (QCToolTip->objectName().isEmpty())
             QCToolTip->setObjectName(QStringLiteral("QCToolTip"));
-        QCToolTip->resize(150, 310);
+        QCToolTip->resize(150, 306);
         QFont font;
         font.setFamily(QString::fromUtf8("\345\276\256\350\275\257\351\233\205\351\273\221"));
         QCToolTip->setFont(font);

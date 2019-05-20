@@ -269,13 +269,16 @@ void MainWnd::on_SndTxtBtn_clicked()
 		}
 		Txt = list.join(" ");
 	}
+	Txt.replace(QString("\n"), QString(""));
 	QByteArray ba = Txt.toLocal8Bit();
+	ba.append('\r');
+	ba.append('\n');
 	LPCSTR ch = ba.data();
 	//hex发送
 	if (ui.HexSwitchBtn->isChecked())
 		ba = QByteArray::fromHex(ba);
 	//字符串发送
-	::send(Socket, ba,ba.length(), 0);
+	qDebug()<<::send(Socket, ba,ba.length(), 0);
 }
 
 //清空接收
