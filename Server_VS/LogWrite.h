@@ -19,9 +19,18 @@ public:
 	LogWrite();
 	~LogWrite();
 
-	//写入系统日志
-   static void SYSLogMsgOutPut(QString ErrMSG);
-   static void DataLogMsgOutPut(QString MSG);
-   static void WarningLogMsgOutPut(QString ErrMSG);
+	/*
+	* @brief 写入系统运行日志
+	* @param MSG 参数1 运行信息
+	* @return 返回说明
+	无
+	*/
+   static void WriteLog(QString MSG);
+   /*
+   * @brief 写入系统报警日志
+   * @param MSG 参数1 运行信息
+   * @return 返回说明
+   无
+   */
 
 };

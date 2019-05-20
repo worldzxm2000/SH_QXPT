@@ -20,11 +20,10 @@
 
 #include <activemq/util/Config.h>
 #include <activemq/transport/AbstractTransportFactory.h>
-#include <activemq/exceptions/ActiveMQException.h>
 
-namespace activemq{
-namespace transport{
-namespace tcp{
+namespace activemq {
+namespace transport {
+namespace tcp {
 
     using decaf::lang::Pointer;
 

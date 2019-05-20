@@ -2,8 +2,11 @@
 #include<QJsonObject>
 #include<QJsonDocument>
 #include<qDebug>
-WebCommServer::WebCommServer()
+#include"LogWrite.h"
+WebCommServer::WebCommServer(QObject *parent )
+	:QObject(parent)
 {
+
 }
 
 
@@ -15,7 +18,6 @@ WebCommServer::~WebCommServer()
 void WebCommServer::onMessage(const Message* message)
 {
 	try {
-		
 		const TextMessage* textMessage = dynamic_cast<const TextMessage*> (message);
 		string text = "";
 
@@ -29,9 +31,8 @@ void WebCommServer::onMessage(const Message* message)
 				if (doc.isObject())
 				{
 					json = doc.object();
-					int ServiceTypeID = json.find("ServiceTypeID").value().toInt();
-					QString StationID = json.find("StationID").value().toString();
-					QString DeviceID = json.find("DeviceID").value().toString();
+					QString UID = json.find("UID").value().toString();
+					int FUID = json.find("FUID").value().toInt();
 					int CommandID = json.find("Command").value().toInt();
 					QJsonObject Params = json.find("Parameter").value().toObject();
 					int ParamsCount = Params.find("Count").value().toInt();
@@ -42,15 +43,9 @@ void WebCommServer::onMessage(const Message* message)
 						if(paramter!=NULL)
 							commLst.append(paramter);
 					}
-					emit NoticfyServerFacilityID(ServiceTypeID, StationID, DeviceID, CommandID,commLst);
+					emit NewWebRequest(UID,FUID, CommandID,commLst);
 				}
-			}
-			else
-			{
-				qDebug() << "===> please check the string " << qTxt.toLocal8Bit().data();
-
-			}
-			
+			}	
 		}
 	}
 	catch (CMSException& e) {
@@ -68,26 +63,17 @@ bool WebCommServer::initialize()
 {
 	try {
 	// Create a ConnectionFactory
-	auto_ptr<ConnectionFactory> connectionFactory(
-		ConnectionFactory::createCMSConnectionFactory(brokerURI));
-
+	auto_ptr<ConnectionFactory> connectionFactory(ConnectionFactory::createCMSConnectionFactory(brokerURI));
 	// Create a Connection
 	connection = connectionFactory->createConnection();
 	connection->start();
 	connection->setExceptionListener(this);
-
 	// Create a Session
 	session = connection->createSession(Session::AUTO_ACKNOWLEDGE);
-	
-
 	// Create the destination (Topic or Queue)
-
-		destination = session->createQueue(destURI);
-		
-
+	destination = session->createQueue(destURI);
 	// Create a MessageConsumer from the Session to the Topic or Queue
 	consumer = session->createConsumer(destination);
-
 	consumer->setMessageListener(this);
 	return true;
 	}
@@ -96,6 +82,7 @@ bool WebCommServer::initialize()
 		return false;
 	}
 }
+
 
 void WebCommServer::close()
 {
@@ -112,7 +99,6 @@ void WebCommServer::cleanup()
 			ex.printStackTrace();
 		}
 	}
-
 	// Destroy resources.
 	try {
 		delete destination;
@@ -132,5 +118,14 @@ void WebCommServer::cleanup()
 void WebCommServer::onException(const CMSException& ex AMQCPP_UNUSED)
 {
 	
+
+}
+
+void WebCommServer::transportInterrupted()
+{
+
+}
+void WebCommServer::transportResumed()
+{
 
 }

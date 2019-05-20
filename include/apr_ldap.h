@@ -133,7 +133,7 @@
  * In the mean time, please use an LDAP v3.0 toolkit.
  */
 #if LDAP_VERSION_MAX <= 2
-//#error Support for LDAP v2.0 toolkits has been removed from apr-util. Please use an LDAP v3.0 toolkit.
+#error Support for LDAP v2.0 toolkits has been removed from apr-util. Please use an LDAP v3.0 toolkit.
 #endif 
 
 #ifdef __cplusplus

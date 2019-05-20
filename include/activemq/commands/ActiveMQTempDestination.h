@@ -32,7 +32,15 @@ namespace core{
 namespace commands{
 
     class AMQCPP_API ActiveMQTempDestination : public ActiveMQDestination,
-                                               public cms::Closeable {
+                                               public cms::Closeable,
+                                               public decaf::lang::Comparable<ActiveMQTempDestination> {
+    public:
+
+        using ActiveMQDestination::compareTo;
+        using ActiveMQDestination::equals;
+        using ActiveMQDestination::operator<;
+        using ActiveMQDestination::operator==;
+
     protected:
 
         /**
@@ -79,6 +87,22 @@ namespace commands{
             return ActiveMQDestination::equals(value);
         }
 
+        virtual int compareTo(const ActiveMQTempDestination& value) const {
+            return ActiveMQDestination::compareTo(value);
+        }
+
+        virtual bool equals(const ActiveMQTempDestination& value) const {
+            return ActiveMQDestination::equals(&value);
+        }
+
+        virtual bool operator==(const ActiveMQTempDestination& value) const {
+            return ActiveMQDestination::equals(&value);
+        }
+
+        virtual bool operator<(const ActiveMQTempDestination& value) const {
+            return ActiveMQDestination::compareTo(value) < 0;
+        }
+
         virtual void close();
 
         virtual void setPhysicalName(const std::string& physicalName);
@@ -97,14 +121,14 @@ namespace commands{
         /**
          * Retrieves the Parent Connection that created this Connection.
          *
-         * @returns pointer to a Connection if one was set, false otherwise.
+         * @return pointer to a Connection if one was set, false otherwise.
          */
         core::ActiveMQConnection* getConnection() const {
             return this->connection;
         }
 
         /**
-         * @returns the connection Id of the Connection that created this temporary destination.
+         * @return the connection Id of the Connection that created this temporary destination.
          */
         std::string getConnectionId() const {
             return this->connectionId;

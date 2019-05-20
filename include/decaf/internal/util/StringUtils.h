@@ -39,6 +39,19 @@ namespace util {
         virtual ~StringUtils() {}
 
         /**
+         * Returns the length of the given C string.
+         *
+         * @param string
+         *      The C style string to check.
+         *
+         * @return the length of the string if the size is < Integer::MAX_VALUE.
+         *
+         * @throws RuntimeException if the length becomes larger than
+         *         the max value of an int.
+         */
+        static int stringLength(const char* string);
+
+        /**
          * Perform a comparison between two strings using natural ordering and ignoring case.
          *
          * @param left
@@ -46,7 +59,7 @@ namespace util {
          * @param right
          *      The right-hand string of the comparison.
          *
-         * @returns a negative integer, zero, or a positive integer as the specified string
+         * @return a negative integer, zero, or a positive integer as the specified string
          *          is greater than, equal to, or less than this String, ignoring case considerations.
          */
         static int compareIgnoreCase(const char* left, const char* right);
@@ -60,7 +73,7 @@ namespace util {
          * @param right
          *      The right-hand string of the comparison.
          *
-         * @returns a negative integer, zero, or a positive integer as the specified string
+         * @return a negative integer, zero, or a positive integer as the specified string
          *          is greater than, equal to, or less than this String, ignoring case considerations.
          */
         static int compare(const char* left, const char* right);

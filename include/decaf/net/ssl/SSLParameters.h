@@ -67,7 +67,7 @@ namespace ssl {
         virtual ~SSLParameters();
 
         /**
-         * @returns a copy of the vector of ciphersuites or an empty vector if none have been set.
+         * @return a copy of the vector of ciphersuites or an empty vector if none have been set.
          */
         std::vector<std::string> getCipherSuites() const {
             return this->cipherSuites;
@@ -84,7 +84,7 @@ namespace ssl {
         }
 
         /**
-         * @returns a copy of the vector of protocols or an empty vector if none have been set.
+         * @return a copy of the vector of protocols or an empty vector if none have been set.
          */
         std::vector<std::string> getProtocols() const {
             return this->protocols;
@@ -101,7 +101,7 @@ namespace ssl {
         }
 
         /**
-         * @returns whether client authentication should be requested.
+         * @return whether client authentication should be requested.
          */
         bool getWantClientAuth() const {
             return this->wantClientAuth;
@@ -111,7 +111,8 @@ namespace ssl {
          * Sets whether client authentication should be requested. Calling this method clears the
          * needClientAuth flag.
          *
-         * @param whether client authentication should be requested.
+         * @param wantClientAuth
+         *      whether client authentication should be requested.
          */
         void setWantClientAuth(bool wantClientAuth) {
             this->wantClientAuth = wantClientAuth;
@@ -119,7 +120,7 @@ namespace ssl {
         }
 
         /**
-         * @returns whether client authentication should be required.
+         * @return whether client authentication should be required.
          */
         bool getNeedClientAuth() const {
             return this->needClientAuth;
@@ -154,7 +155,7 @@ namespace ssl {
          * of the list so that it cannot be modified.  If updates are needed a new list
          * must be set via {#setServerNames}.
          *
-         * @returns a list of server names if any were previously configured.
+         * @return a list of server names if any were previously configured.
          */
         std::vector<std::string> getServerNames() const {
             return this->serverNames;

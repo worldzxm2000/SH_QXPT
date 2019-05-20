@@ -27,8 +27,8 @@
 #include <decaf/net/URI.h>
 #include <decaf/util/Properties.h>
 
-namespace activemq{
-namespace core{
+namespace activemq {
+namespace core {
 
     using decaf::lang::Pointer;
 
@@ -92,7 +92,7 @@ namespace core{
          * delivered until the Connection.start method is explicitly
          * called.
          *
-         * @returns a Connection Pointer
+         * @return a Connection Pointer
          *
          * @throws CMSException if an error occurs.
          */
@@ -112,7 +112,7 @@ namespace core{
          * @param password
          *      The password to authenticate with this connection.
          *
-         * @returns a Connection Pointer
+         * @return a Connection Pointer
          *
          * @throws CMSSecurityException if the user credentials are invalid.
          * @throws CMSException if an error occurs.
@@ -137,7 +137,7 @@ namespace core{
          *      The client Id to assign to connection if "" then a random client
          *      Id is created for this connection.
          *
-         * @returns a Connection Pointer
+         * @return a Connection Pointer
          *
          * @throws CMSSecurityException if the user credentials are invalid.
          * @throws CMSException if an error occurs.
@@ -189,7 +189,7 @@ namespace core{
         /**
          * Sets the Broker URI that should be used when creating a new connection instance.
          *
-         * @param brokerURI
+         * @param uri
          *      The string form of the Broker URI, this will be converted to a URI object.
          */
         void setBrokerURI(const std::string& uri);
@@ -197,7 +197,7 @@ namespace core{
         /**
          * Sets the Broker URI that should be used when creating a new connection instance.
          *
-         * @param brokerURI
+         * @param uri
          *      The URI of the broker that this client will connect to.
          */
         void setBrokerURI(const decaf::net::URI& uri);
@@ -239,7 +239,7 @@ namespace core{
         /**
          * Gets the currently configured MessageTransformer for this ConnectionFactory.
          *
-         * @returns the pointer to the currently set cms::MessageTransformer.
+         * @return the pointer to the currently set cms::MessageTransformer.
          */
         virtual cms::MessageTransformer* getMessageTransformer() const;
 
@@ -256,7 +256,7 @@ namespace core{
         /**
          * Gets the pointer to the current PrefetchPolicy that is in use by this ConnectionFactory.
          *
-         * @returns a pointer to this objects PrefetchPolicy.
+         * @return a pointer to this objects PrefetchPolicy.
          */
         PrefetchPolicy* getPrefetchPolicy() const;
 
@@ -273,7 +273,7 @@ namespace core{
         /**
          * Gets the pointer to the current RedeliveryPolicy that is in use by this ConnectionFactory.
          *
-         * @returns a pointer to this objects RedeliveryPolicy.
+         * @return a pointer to this objects RedeliveryPolicy.
          */
         RedeliveryPolicy* getRedeliveryPolicy() const;
 
@@ -308,7 +308,7 @@ namespace core{
 
         /**
          * Gets if the useAsyncSend option is set
-         * @returns true if on false if not.
+         * @return true if on false if not.
          */
         bool isUseAsyncSend() const;
 
@@ -337,7 +337,7 @@ namespace core{
 
         /**
          * Gets if the Connection is configured for Message body compression.
-         * @returns if the Message body will be Compressed or not.
+         * @return if the Message body will be Compressed or not.
          */
         bool isUseCompression() const;
 
@@ -410,7 +410,7 @@ namespace core{
         void setProducerWindowSize(unsigned int windowSize);
 
         /**
-         * @returns true if the Connections that this factory creates should support the
+         * @return true if the Connections that this factory creates should support the
          * message based priority settings.
          */
         bool isMessagePrioritySupported() const;
@@ -427,7 +427,7 @@ namespace core{
         /**
          * Should all created consumers be retroactive.
          *
-         * @returns true if consumer will be created with the retroactive flag set.
+         * @return true if consumer will be created with the retroactive flag set.
          */
         bool isUseRetroactiveConsumer() const;
 
@@ -444,7 +444,7 @@ namespace core{
         /**
          * Should all created consumers be exclusive.
          *
-         * @returns true if consumer will be created with the exclusive flag set.
+         * @return true if consumer will be created with the exclusive flag set.
          */
         bool isExclusiveConsumer() const;
 
@@ -480,7 +480,7 @@ namespace core{
          * for duplication, and the larger the performance impact of duplicate
          * detection will be.
          *
-         * @returns the configured audit depth.
+         * @return the configured audit depth.
          */
         int getAuditDepth() const;
 
@@ -498,7 +498,7 @@ namespace core{
         /**
          * The number of Producers that will be audited.
          *
-         * @returns the configured number of producers to include in the audit.
+         * @return the configured number of producers to include in the audit.
          */
         int getAuditMaximumProducerNumber() const;
 
@@ -544,7 +544,7 @@ namespace core{
          * completion.  This allows the acks to represent delivery status which can be persisted on
          * rollback Used in conjunction with KahaDB set to Rewrite On Redelivery.
          *
-         * @returns true if this option is enabled.
+         * @return true if this option is enabled.
          */
         bool isTransactedIndividualAck() const;
 
@@ -579,7 +579,7 @@ namespace core{
         /**
          * Gets the delay period for a consumer redelivery.
          *
-         * @returns configured time delay in milliseconds.
+         * @return configured time delay in milliseconds.
          */
         long long getConsumerFailoverRedeliveryWaitPeriod() const;
 
@@ -607,7 +607,7 @@ namespace core{
         /**
          * Gets the time between optimized ack batches in milliseconds.
          *
-         * @returns time between optimized ack batches in Milliseconds.
+         * @return time between optimized ack batches in Milliseconds.
          */
         long long getOptimizeAcknowledgeTimeOut() const;
 
@@ -639,6 +639,38 @@ namespace core{
          *      The scheduledOptimizedAckInterval to use for new Consumers.
          */
         void setOptimizedAckScheduledAckInterval(long long optimizedAckScheduledAckInterval);
+
+        /**
+         * Returns the current value of the always session async option.
+         *
+         * @return Returns the alwaysSessionAsync configuration setting.
+         */
+        bool isAlwaysSessionAsync() const;
+
+        /**
+         * If this flag is not set 'true' then a separate thread is not used for dispatching messages
+         * for each Session in the Connection. However, a separate thread is always used if there
+         * is more than one session, or the session isn't in auto acknowledge or duplicates ok mode.
+         * By default this value is set to true and session dispatch happens asynchronously.
+         *
+         * @param alwaysSessionAsync
+         * 		The alwaysSessionAsync value to use when creating new sessions.
+         */
+        void setAlwaysSessionAsync(bool alwaysSessionAsync);
+
+        /**
+         * @return true if the consumer will skip checking messages for expiration.
+         */
+        bool isConsumerExpiryCheckEnabled();
+
+        /**
+         * Configures whether this consumer will perform message expiration processing
+         * on all incoming messages.  This feature is enabled by default.
+         *
+         * @param consumerExpiryCheckEnabled
+         *      False if the default message expiration checks should be disabled.
+         */
+        void setConsumerExpiryCheckEnabled(bool consumerExpiryCheckEnabled);
 
     public:
 
@@ -673,7 +705,7 @@ namespace core{
          * @param properties
          *      The Properties that are assigned to the new Connection instance.
          *
-         * @returns a new ActiveMQConnection pointer instance.
+         * @return a new ActiveMQConnection pointer instance.
          */
         virtual ActiveMQConnection* createActiveMQConnection(const Pointer<transport::Transport>& transport,
                                                              const Pointer<decaf::util::Properties>& properties);

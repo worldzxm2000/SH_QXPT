@@ -59,7 +59,7 @@ namespace util {
          * @throws IllegalArgumentException if some property of the specified element prevents it
          *         from being added to this deque.
          */
-        virtual void addFirst( const E& element ) = 0;
+        virtual void addFirst(const E& element) = 0;
 
         /**
          * Inserts an element onto the end of the Deque if possible without violating
@@ -76,7 +76,7 @@ namespace util {
          * @throws IllegalArgumentException if some property of the specified element prevents it
          *         from being added to this deque.
          */
-        virtual void addLast( const E& element ) = 0;
+        virtual void addLast(const E& element) = 0;
 
         /**
          * This method attempts to insert the given element into the Deque at the front end.
@@ -86,14 +86,14 @@ namespace util {
          * @param element
          *      The element to add to this Deque.
          *
-         * @returns true if the element was added, false otherwise.
+         * @return true if the element was added, false otherwise.
          *
          * @throws NullPointerException if the specified element is NULL and this deque is a Collection
          *         of pointers and does not permit null elements.
          * @throws IllegalArgumentException if some property of the specified element prevents it
          *         from being added to this deque.
          */
-        virtual bool offerFirst( const E& element ) = 0;
+        virtual bool offerFirst(const E& element) = 0;
 
         /**
          * This method attempts to insert the given element into the Deque at the end. Unlike
@@ -103,20 +103,20 @@ namespace util {
          * @param element
          *      The element to add to this Deque.
          *
-         * @returns true if the element was added, false otherwise.
+         * @return true if the element was added, false otherwise.
          *
          * @throws NullPointerException if the specified element is NULL and this deque is a Collection
          *         of pointers and does not permit null elements.
          * @throws IllegalArgumentException if some property of the specified element prevents it
          *         from being added to this deque.
          */
-        virtual bool offerLast( const E& element ) = 0;
+        virtual bool offerLast(const E& element) = 0;
 
         /**
          * Removes the topmost element from the Deque and returns it.  Unlike the pollFirst
          * method this method throws a NuSuchElementException if the Deque is empty.
          *
-         * @returns the element at the Head of the Deque.
+         * @return the element at the Head of the Deque.
          *
          * @throws NoSuchElementException if the Deque is empty.
          */
@@ -126,7 +126,7 @@ namespace util {
          * Removes the last element from the Deque and returns it.  Unlike the pollLast
          * method this method throws a NuSuchElementException if the Deque is empty.
          *
-         * @returns the element at the Tail of the Deque.
+         * @return the element at the Tail of the Deque.
          *
          * @throws NoSuchElementException if the Deque is empty.
          */
@@ -138,9 +138,9 @@ namespace util {
          * @param element
          *      Reference to an variable that can be assigned the value of the head of this Deque.
          *
-         * @returns true if an element was available to remove, false otherwise.
+         * @return true if an element was available to remove, false otherwise.
          */
-        virtual bool pollFirst( E& element ) = 0;
+        virtual bool pollFirst(E& element) = 0;
 
         /**
          * Removes the last element from the Deque assigns it to the element reference passed.
@@ -148,15 +148,15 @@ namespace util {
          * @param element
          *      Reference to an variable that can be assigned the value of the tail of this Deque.
          *
-         * @returns true if an element was available to remove, false otherwise.
+         * @return true if an element was available to remove, false otherwise.
          */
-        virtual bool pollLast( E& element ) = 0;
+        virtual bool pollLast(E& element) = 0;
 
         /**
          * Attempts to fetch a reference to the first element in the Deque.  This method does
          * not remove the element from the Deque but simply returns a reference to it.
          *
-         * @returns reference to the first element in the Deque.
+         * @return reference to the first element in the Deque.
          *
          * @throws NoSuchElementException if the Deque is empty.
          */
@@ -167,7 +167,7 @@ namespace util {
          * Attempts to fetch a reference to the last element in the Deque.  This method does
          * not remove the element from the Deque but simply returns a reference to it.
          *
-         * @returns reference to the last element in the Deque.
+         * @return reference to the last element in the Deque.
          *
          * @throws NoSuchElementException if the Deque is empty.
          */
@@ -180,9 +180,9 @@ namespace util {
          * call is successful it returns true.  Unlike getFirst this method does not throw an
          * exception if the Deque is empty.
          *
-         * @returns true if an element was assigned to the reference passed, false otherwise.
+         * @return true if an element was assigned to the reference passed, false otherwise.
          */
-        virtual bool peekFirst( E& value ) const = 0;
+        virtual bool peekFirst(E& value) const = 0;
 
         /**
          * Retrieves the last element contained in this Deque and assigns its value to the
@@ -190,9 +190,9 @@ namespace util {
          * call is successful it returns true.  Unlike getLast this method does not throw an
          * exception if the Deque is empty.
          *
-         * @returns true if an element was assigned to the reference passed, false otherwise.
+         * @return true if an element was assigned to the reference passed, false otherwise.
          */
-        virtual bool peekLast( E& value ) const = 0;
+        virtual bool peekLast(E& value) const = 0;
 
         /**
          * Removes the first occurrence of the specified element from this Deque.  If there is no
@@ -201,12 +201,12 @@ namespace util {
          * @param value
          *      The value to be removed from this Deque.
          *
-         * @returns true if the Deque was modified as a result of this operation.
+         * @return true if the Deque was modified as a result of this operation.
          *
          * @throws NullPointerException if the specified element is NULL and this deque is a Collection
          *         of pointers and does not permit null elements.
          */
-        virtual bool removeFirstOccurrence( const E& value ) = 0;
+        virtual bool removeFirstOccurrence(const E& value) = 0;
 
         /**
          * Removes the last occurrence of the specified element from this Deque.  If there is no
@@ -215,12 +215,12 @@ namespace util {
          * @param value
          *      The value to be removed from this Deque.
          *
-         * @returns true if the Deque was modified as a result of this operation.
+         * @return true if the Deque was modified as a result of this operation.
          *
          * @throws NullPointerException if the specified element is NULL and this deque is a Collection
          *         of pointers and does not permit null elements.
          */
-        virtual bool removeLastOccurrence( const E& value ) = 0;
+        virtual bool removeLastOccurrence(const E& value) = 0;
 
         /**
          * Pushes an element onto the stack represented by this deque (in other words, at the head
@@ -239,7 +239,7 @@ namespace util {
          * @throws IllegalArgumentException if some property of the specified element prevents it
          *         from being added to this deque.
          */
-        virtual void push( const E& element ) = 0;
+        virtual void push(const E& element) = 0;
 
         /**
          * Treats this Deque as a stack and attempts to pop an element off the top.  If there's no
@@ -257,7 +257,7 @@ namespace util {
         /**
          * Provides an Iterator over this Collection that traverses the element in reverse order.
          *
-         * @returns a new Iterator instance that moves from last to first.
+         * @return a new Iterator instance that moves from last to first.
          */
         virtual Iterator<E>* descendingIterator() = 0;
         virtual Iterator<E>* descendingIterator() const = 0;

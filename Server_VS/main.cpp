@@ -1,10 +1,10 @@
-#include "server_vs.h"
+#include "MainWnd.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	Server_VS w;
+	MainWnd w;
 	w.show();
 	return a.exec();
 }

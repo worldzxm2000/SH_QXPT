@@ -2,7 +2,6 @@
 #include<process.h>
 #include<qmessagebox.h>
 #include"LogWrite.h"
-#include"Dictionary.h"
 #include<qdebug.h>
 #include<qthread.h>
 #include<qjsondocument.h>
@@ -17,44 +16,43 @@ QMutex m_timerMutexSocket;
 IOCP::IOCP()
 {
 	m_ThreadsCount = 0;
+	m_ReleaseTimerID = startTimer(1000*60*24);
 }
-
 IOCP::~IOCP()
 {
 
 }
-
-void IOCP::SetListenedPort(int Port, QString IP, int SrvID)
+void IOCP::SetListenedPort(int Port, QString IP)
 {
 	this->m_Port = Port;
 	this->m_IP = IP;
-	this->m_SrvID = SrvID;
+	//开启定时器，做连接超时判断
 	m_TimeOutTimerID = startTimer(1 * 1000);
 }
-
 void IOCP::Stop()
 {
+	//关闭定时器
 	killTimer(m_TimeOutTimerID);
+	killTimer(m_ReleaseTimerID);
 	int result = -1;
-	//断开socket连接
-	for (int i = 0; i < Sockets.count(); i++)
-	{
-		result = closesocket(Sockets.at(i)->Socket);
-	}
-
+	//先终止子进程，然后再断开Sokcet
 	for (int i = 0; i < m_ThreadsCount; i++)
 	{
 		// 通知所有的完成端口操作退出  
 		result = PostQueuedCompletionStatus(m_CompletionPort, 0, NULL, NULL);
 	}
-
+	//断开socket连接
+	for (int i = 0; i < Sockets.count(); i++)
+	{
+		 shutdown(Sockets.at(i)->Socket, 2);
+		 closesocket(Sockets.at(i)->Socket);
+		emit OffLineSignal(Sockets.at(i)->Socket);
+	}
 	Sockets.clear();
 	result = closesocket(m_SrvSocket);
 	WSACleanup();
-	LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("服务已关闭，端口号为：") + QString::number(m_Port));
+	LogWrite::WriteLog(QString::fromLocal8Bit("服务已关闭，端口号为：") + QString::number(m_Port));
 }
-
-
 void IOCP::run()
 {
 	//初始化WSA    加载socket动态链接库
@@ -70,7 +68,7 @@ void IOCP::run()
 	//创建完成端口线程
 	SYSTEM_INFO mySysInfo;
 	GetSystemInfo(&mySysInfo);
-	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors * 2);
+	m_ThreadsCount = (mySysInfo.dwNumberOfProcessors);
 	for (int i = 0; i < m_ThreadsCount; ++i)
 	{
 		HANDLE threadhandle = (HANDLE)_beginthreadex(NULL, 0, ServerWorkThread, (HANDLE)this, 0, NULL);
@@ -114,10 +112,12 @@ void IOCP::run()
 			break;
 
 		//客户端socket与IOCP关联
+		PerHandleData->FUID = 0;//设备UID
 		PerHandleData->Socket = acceptSocket;//Sccket号
 		PerHandleData->Port = saRemote.sin_port;//端口号
-		PerHandleData->Count = 0;//接收个数
-		PerHandleData->ClientIP = inet_ntoa(saRemote.sin_addr);	//客户端IP
+		PerHandleData->IP = inet_ntoa(saRemote.sin_addr);	//客户端IP
+		PerHandleData->Available = false;//未识别连接
+		PerHandleData->Timer = 0;//超时计数
 		//客户端socket绑定IOCP
 		CreateIoCompletionPort((HANDLE)(PerHandleData->Socket), m_CompletionPort, (DWORD)PerHandleData, 0);
 		//IO重叠
@@ -128,44 +128,60 @@ void IOCP::run()
 		PerIoData->databuff.buf = PerIoData->buffer;
 		PerIoData->operationType = RECV;
 
-		//客户端socket添加入客户端数组，通知主程序
+		//客户端socket添加入客户端数组
 		Sockets.push_back(PerHandleData);
 		//获取设备信息,判断连接是否为设备
 		func_GetFacilityInfo(acceptSocket);
-		PerHandleData->Timer = 0;
+		
+		emit NewConnectionSignal(PerHandleData->IP, PerHandleData->Port, m_Port, PerHandleData->Socket);
 		DWORD RecvBytes = 0;
 		DWORD Flags = 0;
 		//接收数据
 		WSARecv(PerHandleData->Socket, &(PerIoData->databuff), 1, &RecvBytes, &Flags, &(PerIoData->overlapped), NULL);
 	}
 }
-
 void IOCP::timerEvent(QTimerEvent * event)
 {
-	//定时释放资源
-	for (int i = Sockets.count() - 1; i > -1; i--)
+	if (m_TimeOutTimerID == event->timerId())
 	{
-		LPPER_HANDLE_DATA perhandledata= Sockets[i];
-		//释放已经删除的连接信息
-		if (perhandledata== NULL)
+		//定时释放资源
+		for (int i = Sockets.count() - 1; i > -1; i--)
 		{
-			ReleaseSocket(perhandledata);
-			continue;
-		}
-		else
-		{
-			//判断连接是否为有效连接，如果没有台站和设备号信息，视为无效连接，删除。
-			if (Sockets[i]->StationID == nullptr && Sockets[i]->DeviceID == nullptr)
+			LPPER_HANDLE_DATA perhandledata = Sockets.at(i);
+			//释放已经删除的连接信息
+			if (perhandledata == NULL)
 			{
-				if (++Sockets[i]->Timer > TIMEOUT)
+				ReleaseSocket(perhandledata);
+				continue;
+			}
+			else
+			{
+				//判断连接是否为有效连接，如果没有台站和设备号信息，视为无效连接，删除。
+				if (false == Sockets[i]->Available)
 				{
-					closesocket(Sockets[i]->Socket);
+					if (++Sockets[i]->Timer > TIMEOUT)
+					{
+						shutdown(Sockets.at(i)->Socket, 2);
+						closesocket(Sockets[i]->Socket);
+					}
 				}
 			}
 		}
 	}
+	//判断连接是否为有效连接,删除过期连接。
+	else if (m_ReleaseTimerID==event->timerId())
+	{
+		for (int i = Sockets.count() - 1; i > -1; i--)
+		{
+			int result = ::send(Sockets[i]->Socket, "test", 5, 0);
+			if (result < 0)
+			{
+				shutdown(Sockets.at(i)->Socket, 2);
+				closesocket(Sockets.at(i)->Socket);
+			}
+		}
+	}
 }
-//IOCP线程队列
 unsigned IOCP::ServerWorkThread(LPVOID pParam)
 {
 	try
@@ -197,7 +213,7 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 						如果函数由于等待超时而未能出列完成包，GetLastError返回WAIT_TIMEOUT.   */
 				{
 					error = GetLastError();
-					LogWrite::SYSLogMsgOutPut("iocp has bug at 168,error msg is " + QString::number(error));
+					LogWrite::WriteLog("iocp has bug at 168,error msg is " + QString::number(error));
 					continue;
 				}
 				//IpOverlapped != NULL
@@ -219,8 +235,11 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 						//释放掉资源（服务器主动断开触发）
 					if (NULL != pIOCP)
 					{
+						LogWrite::WriteLog(QString::fromLocal8Bit("服务器断开连接:") + PerHandleData->IP);
 						emit pIOCP->OffLineSignal(PerHandleData->Socket);
 						pIOCP->ReleaseSocket(PerHandleData);
+						GlobalFree(PerIoData);
+					
 					//	delete PerHandleData;
 					//	PerHandleData = NULL;
 					}
@@ -237,6 +256,7 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 				if (NULL == PerIoData)
 					//关闭了服务器监听，直接退出IOCP子线程
 				{
+					LogWrite::WriteLog(QString::fromLocal8Bit("服务器关闭连接"));
 					break;
 				}
 
@@ -246,11 +266,11 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 					//释放掉资源（设备主动断开连接触发）
 					if (NULL != pIOCP)
 					{
+						LogWrite::WriteLog(QString::fromLocal8Bit("设备断开连接:") + PerHandleData->IP);
 						emit pIOCP->OffLineSignal(PerHandleData->Socket);
+						shutdown(PerHandleData->Socket, 2);
 						closesocket(PerHandleData->Socket);
 						pIOCP->ReleaseSocket(PerHandleData);
-						//delete PerHandleData;
-						//PerHandleData = NULL;
 						GlobalFree(PerIoData);
 					}
 					continue;
@@ -283,18 +303,20 @@ unsigned IOCP::ServerWorkThread(LPVOID pParam)
 	}
 
 }
-
-//接收处理数据
-void IOCP::DoRecvData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA PerHandleData)
+void IOCP::DoRecvData(LPPER_IO_DATA perIOData, DWORD len, LPPER_HANDLE_DATA PerHandleData)
 {
 	try
 	{
 		//接收封装统一的Json
 		QJsonObject JsonObj;
-		//单次接收的数据
+		//单次接收的数据，分为字节或者字符串处理
+		/***********************需改进，收到char数组，可直接处理，不必再转成QString****************/
 		QString RecvStr = QString(QLatin1String(perIOData->buffer, len));
+		QVariant varnt;
+		varnt.setValue(PerHandleData);
+		emit ShowTxt(RecvStr, varnt);
 		//去除多余符号
-		RecvStr = RecvStr.trimmed();
+		//RecvStr = RecvStr.trimmed();
 		PerHandleData->Frame += RecvStr;
 		LRESULT pResult = -1;
 		//数据内存判断，如果数据内存大于40M说明有错误数据 需要清空内存，否则会造成内存溢
@@ -304,9 +326,11 @@ void IOCP::DoRecvData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Pe
 			emit ErrorMSGSignal(10305);
 			return;
 		}
+		//接收到数据为HTTP请求，非设备数据
 		if (PerHandleData->Frame.toUpper().contains("HTTP"))
 		{
-			qDebug() << PerHandleData->Frame;
+			LogWrite::WriteLog(QString::fromLocal8Bit("接收到非设备数据:") + PerHandleData->Frame);
+			shutdown(PerHandleData->Socket, 2);
 			closesocket(PerHandleData->Socket);
 			ReleaseSocket(PerHandleData);
 			return;
@@ -316,7 +340,7 @@ void IOCP::DoRecvData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Pe
 		//判断接收情况
 		switch (pResult)
 		{
-			//1：解析成功
+		//1：解析成功
 		case 1:
 		{
 			//接收到数据个数
@@ -339,139 +363,84 @@ void IOCP::DoRecvData(LPPER_IO_DATA perIOData, u_short len, LPPER_HANDLE_DATA Pe
 					LPCSTR dataChar;
 					dataChar = byteArray.data();
 					QString ServiceID = data_json.find("ServiceTypeID").value().toString();
-					if (ServiceID.toInt() == 18)//植被
-					{
-						//获取区站号
-						PerHandleData->StationID = data_json.find("StationID").value().toString();
-						PerHandleData->DeviceID = data_json.find("DeviceID").value().toString();
-						int file = data_json.find("FileType").value().toInt();
-						//通知EHT,新的数据
-						emit NewDataSignal(
-							PerHandleData->StationID,
-							PerHandleData->ClientIP,
-							PerHandleData->Port,
-							file,
-							PerHandleData->Socket,
-							PerHandleData->DeviceID);
-						break;
-					}
-
-					//发送至消息中间件
-					if (g_SimpleProducer.send(dataChar, strlen(dataChar)) < 0)
-						emit ErrorMSGSignal(10304);
-					if (g_SimpleProducer_ZDH.send(dataChar, strlen(dataChar)) < 0)
-						emit ErrorMSGSignal(10304);
-
-
 					//获取区站号
 					PerHandleData->StationID = data_json.find("StationID").value().toString();
 					//获取设备号
 					PerHandleData->DeviceID = data_json.find("DeviceID").value().toString();
+					if (ServiceID.toInt() == 18)//植被
+					{
+						//获取文件处理类型
+						int file = data_json.find("FileType").value().toInt();
+						//通知EHT,新的数据
+						QVariant varnt;
+						varnt.setValue(PerHandleData);
+						emit NewDataSignal(varnt,file);
+						break;
+					}
+					if (ServiceID.toInt() == 23)//宁夏墒情
+					{
+						//宁夏墒情，每帧数据需要返回OK命令
+						QString Ok = "OK\r\n";
+						QByteArray ba = Ok.toLatin1();
+						LPCSTR ch = ba.data();
+						int len = Ok.length();
+						::send(PerHandleData->Socket, ch, len, 0);
+					}
+
+					//发送至消息中间件
+					if (g_MQProducer_Data->send(dataChar)==0||g_MQProducer_MDB->send(dataChar) == 0)
+						emit ErrorMSGSignal(10304);
 					//通知EHT,新的数据
-					emit NewDataSignal(
-						PerHandleData->StationID,
-						PerHandleData->ClientIP,
-						PerHandleData->Port,
-						PerHandleData->Socket,
-						PerHandleData->DeviceID);
+					QVariant varnt;
+					varnt.setValue(PerHandleData);
+					emit NewDataSignal(varnt);
+					//数据来源为可用设备
+					PerHandleData->Available = true;
 					break;
 				}
-				break;
 				case 2://操作数据
 				{
-					int ValueCount = data_json.find("ValueCount").value().toInt();
-					switch (ValueCount)
-					{
-					case 1:
-					{
-						QString Value = data_json.find("RecvValue1").value().toString();
-						emit OperationResultSignal(Value, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
-						break;
-					}
-					case 2:
-					{
-						QString Value1 = data_json.find("RecvValue1").value().toString();
-						QString Value2 = data_json.find("RecvValue2").value().toString();
-						emit OperationResultSignal(Value1, Value2, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
-						break;
-					}
-					case 5://农田小气候和水质 
-					{
-						QString ServiceTypeID = data_json.find("ServiceTypeID").value().toString();
-						QString StationID = data_json.find("StationID").value().toString();
-						QString Command = data_json.find("Command").value().toString();
-						QString DeviceID = data_json.find("DeviceID").value().toString() == NULL ? "NULL" : data_json.find("DeviceID").value().toString();
-						QString Value1 = data_json.find("RecvValue1").value().toString();
-						emit OperationResultSignal(Command, Value1, "NULL", "NULL", "NULL", m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
-						break;
-					}
-					//航空操作数据或水体液位
-					case 7:
-					{
-						QString ServiceTypeID = data_json.find("ServiceTypeID").value().toString();
-						QString StationID = data_json.find("StationID").value().toString();
-						QString Command = data_json.find("Command").value().toString();
-						QString DeviceID = data_json.find("DeviceID").value().toString() == NULL ? "NULL" : data_json.find("DeviceID").value().toString();
-						QString Value1 = data_json.find("RecvValue1").value().toString();
-						QString Value2 = data_json.find("RecvValue2").value().toString();
-						QString Value3 = data_json.find("RecvValue3").value().toString();
-						QString Value4 = data_json.find("RecvValue4").value().toString();
-						emit OperationResultSignal(Command, Value1, Value2, Value3, Value4, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
-						break;
-					}
-					case 8://便携式
-					{
-
-						emit OperationResultSignal(data_json, m_Port, PerHandleData->StationID, PerHandleData->DeviceID);
-						break;
-					}
-					default:
-						break;
-					}
-
+					//获取终端返回数据
+					QVariant varnt;
+					varnt.setValue(PerHandleData);
+					emit OperationResultSignal(data_json, varnt);
+				
+					//数据来源为可用设备
+					PerHandleData->Available = true;
+					break;
 				}
-				break;
 				case 3://心跳数据
 				{
 					//获取区站号
 					PerHandleData->StationID = data_json.find("StationID").value().toString();
 					//获取设备号
 					PerHandleData->DeviceID = data_json.find("DeviceID").value().toString();
-					emit NewDataSignal(
-						PerHandleData->StationID,
-						PerHandleData->ClientIP,
-						PerHandleData->Port,
-						PerHandleData->Socket,
-						PerHandleData->DeviceID);
+					QVariant varnt;
+					varnt.setValue(PerHandleData);
+					emit NewDataSignal(varnt);
+					//数据来源为可用设备
+					PerHandleData->Available = true;
 					break;
 				}
-				break;
 				}
+			
 			}
 			break;
 		}
 		default://-1：表示未知数据
-			LogWrite::SYSLogMsgOutPut(QString::fromLocal8Bit("台站号") + PerHandleData->StationID + QString::fromLocal8Bit("意外的接收字节:") + PerHandleData->Frame);
 			break;
 		}
 	}
 	catch (const std::exception&)
 	{
-		LogWrite::SYSLogMsgOutPut("解析数据发生异常错误!");
+		LogWrite::WriteLog("解析数据发生异常错误!");
 		return;
 	}
 
 }
-
-int IOCP::GetSocket()
-{
-	return m_SrvSocket;
-}
-
-
 void IOCP::ReleaseSocket(LPPER_HANDLE_DATA &lpPerhandleData)
 {
-
+	//多线程锁，释放Perhandledata资源
 	m_timerMutexSocket.lock();
 	Sockets.removeOne(lpPerhandleData);
 	m_timerMutexSocket.unlock();

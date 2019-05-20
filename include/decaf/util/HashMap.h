@@ -392,7 +392,7 @@ namespace util {
 
             virtual void remove() {
                 throw lang::exceptions::UnsupportedOperationException(
-                    __FILE__, __LINE__, "Cannot write to a const Iterator." );
+                    __FILE__, __LINE__, "Cannot write to a const Iterator.");
             }
         };
 
@@ -420,7 +420,7 @@ namespace util {
 
             virtual void remove() {
                 throw lang::exceptions::UnsupportedOperationException(
-                    __FILE__, __LINE__, "Cannot write to a const Iterator." );
+                    __FILE__, __LINE__, "Cannot write to a const Iterator.");
             }
         };
 
@@ -448,7 +448,7 @@ namespace util {
 
             virtual void remove() {
                 throw lang::exceptions::UnsupportedOperationException(
-                    __FILE__, __LINE__, "Cannot write to a const Iterator." );
+                    __FILE__, __LINE__, "Cannot write to a const Iterator.");
             }
         };
 
@@ -490,7 +490,7 @@ namespace util {
                 return false;
             }
 
-            virtual bool contains(const MapEntry<K,V>& entry) {
+            virtual bool contains(const MapEntry<K,V>& entry) const {
                 HashMapEntry* result = associatedMap->getEntry(entry.getKey());
                 if (result != NULL && entry.getValue() == result->getValue()) {
                     return true;
@@ -539,7 +539,7 @@ namespace util {
                         __FILE__, __LINE__, "Can't remove from const collection");
             }
 
-            virtual bool contains(const MapEntry<K,V>& entry) {
+            virtual bool contains(const MapEntry<K,V>& entry) const {
                 HashMapEntry* result = associatedMap->getEntry(entry.getKey());
                 if (result != NULL && entry.getValue() == result->getValue()) {
                     return true;
@@ -557,7 +557,7 @@ namespace util {
             }
         };
 
-        protected:
+    protected:
 
         class HashMapKeySet : public AbstractSet<K> {
         private:
@@ -909,6 +909,16 @@ namespace util {
         }
 
     public:
+
+        HashMap<K, V>& operator= (const Map<K, V>& other) {
+            this->copy(other);
+            return *this;
+        }
+
+        HashMap<K, V>& operator= (const HashMap<K, V>& other) {
+            this->copy(other);
+            return *this;
+        }
 
         bool operator==(const Map<K, V>& other) const {
             return this->equals(other);

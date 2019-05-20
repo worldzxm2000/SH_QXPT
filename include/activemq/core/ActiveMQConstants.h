@@ -21,8 +21,8 @@
 #include <map>
 #include <activemq/util/Config.h>
 
-namespace activemq{
-namespace core{
+namespace activemq {
+namespace core {
 
     /**
      * Class holding constant values for various ActiveMQ specific things
@@ -50,7 +50,7 @@ namespace core{
             DESTINATION_REMOVE_OPERATION = 1
         };
 
-        // Represents the Acknowledgement types that are supported for the
+        // Represents the Acknowledgment types that are supported for the
         // Message Ack Command.
         enum AckType {
             ACK_TYPE_DELIVERED   = 0,  // Message delivered but not consumed
@@ -58,7 +58,9 @@ namespace core{
                                        // poison pill but discard anyway
             ACK_TYPE_CONSUMED    = 2,  // Message consumed, discard
             ACK_TYPE_REDELIVERED = 3,  // Message has been re-delivered.
-            ACK_TYPE_INDIVIDUAL  = 4   // Acks a single message at a time.
+            ACK_TYPE_INDIVIDUAL  = 4,  // Acks a single message at a time.
+            ACK_TYPE_UNMATCHED   = 5,  // Durable sub doesn't match selector
+            ACK_TYPE_EXPIRED     = 6   // Message expired.
         };
 
         /**

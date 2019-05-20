@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QtGuiClass</class>
- <widget class="QWidget" name="QtGuiClass">
+ <class>MQConfig</class>
+ <widget class="QWidget" name="MQConfig">
   <property name="windowModality">
    <enum>Qt::WindowModal</enum>
   </property>
@@ -9,9 +9,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>330</height>
+    <width>337</width>
+    <height>193</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>337</width>
+    <height>193</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -20,7 +26,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>终端控制</string>
+   <string>消息中间件设置</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -34,8 +40,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>281</width>
-     <height>311</height>
+     <width>321</width>
+     <height>181</height>
     </rect>
    </property>
    <property name="title">
@@ -46,37 +52,24 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>251</width>
-      <height>91</height>
+      <width>301</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="title">
      <string>ULR</string>
     </property>
-    <widget class="QPushButton" name="WIPBtn">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>设置</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_IP">
+    <widget class="QLineEdit" name="lineEdit_URL">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>181</width>
+       <width>281</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>tcp://117.158.216.250:61616</string>
+      <string/>
      </property>
     </widget>
    </widget>
@@ -84,33 +77,20 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>110</y>
-      <width>171</width>
-      <height>91</height>
+      <y>80</y>
+      <width>121</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="title">
      <string>账户名</string>
     </property>
-    <widget class="QPushButton" name="RQZBtn">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>设置</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_QZ">
+    <widget class="QLineEdit" name="lineEdit_admin">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>151</width>
+       <width>101</width>
        <height>20</height>
       </rect>
      </property>
@@ -119,29 +99,16 @@
    <widget class="QGroupBox" name="groupBox_FTPSEVER">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>210</y>
+      <x>140</x>
+      <y>80</y>
       <width>171</width>
-      <height>91</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="title">
      <string>密码</string>
     </property>
-    <widget class="QPushButton" name="RFTPSERVERBtn">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>设置</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="lineEdit_FTPSERVER">
+    <widget class="QLineEdit" name="lineEdit_password">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -152,16 +119,27 @@
      </property>
     </widget>
    </widget>
+   <widget class="QPushButton" name="OKBtn">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>设置</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
-  <tabstop>lineEdit_IP</tabstop>
-  <tabstop>WIPBtn</tabstop>
-  <tabstop>lineEdit_QZ</tabstop>
-  <tabstop>RQZBtn</tabstop>
-  <tabstop>lineEdit_FTPSERVER</tabstop>
-  <tabstop>RFTPSERVERBtn</tabstop>
+  <tabstop>lineEdit_URL</tabstop>
+  <tabstop>lineEdit_admin</tabstop>
+  <tabstop>lineEdit_password</tabstop>
+  <tabstop>OKBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

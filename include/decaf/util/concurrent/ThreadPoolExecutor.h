@@ -311,7 +311,7 @@ namespace concurrent{
          * for debugging and monitoring, care should be taken when using this method.  The executor
          * continues to execute tasks from the Queue.
          *
-         * @returns a pointer to the blocking queue that this executor stores future tasks in.
+         * @return a pointer to the blocking queue that this executor stores future tasks in.
          */
         virtual BlockingQueue<decaf::lang::Runnable*>* getQueue();
 
@@ -346,7 +346,7 @@ namespace concurrent{
          * that are not core threads continue to time out using the set keep alive value
          * regardless of whether this option is enabled.
          *
-         * @returns true if core threads can timeout when idle.
+         * @return true if core threads can timeout when idle.
          */
         virtual bool allowsCoreThreadTimeout() const;
 
@@ -357,7 +357,7 @@ namespace concurrent{
          * @param unit
          *      The unit of time to return the results in.
          *
-         * @returns the configure keep alive time in the requested time units.
+         * @return the configure keep alive time in the requested time units.
          */
         virtual long long getKeepAliveTime(const TimeUnit& unit) const;
 
@@ -393,14 +393,14 @@ namespace concurrent{
          * Gets the currently configured ThreadFactory.  It is considered a programming
          * error to delete the pointer returned by this method.
          *
-         * @returns the currently configured ThreadFactory instance used by this object.
+         * @return the currently configured ThreadFactory instance used by this object.
          */
         virtual ThreadFactory* getThreadFactory() const;
 
         /**
          * Gets the currently configured RejectedExecutionHandler for this Executor.
          *
-         * @returns a pointer to the current RejectedExecutionHandler.
+         * @return a pointer to the current RejectedExecutionHandler.
          */
         virtual RejectedExecutionHandler* getRejectedExecutionHandler() const;
 
@@ -431,7 +431,7 @@ namespace concurrent{
          * new tasks up to the set core thread limit.  When the limit is reached this method returns
          * zero to indicate no more core threads can be created.
          *
-         * @returns the number of core threads created, or zero if the limit has already been met.
+         * @return the number of core threads created, or zero if the limit has already been met.
          */
         virtual int prestartAllCoreThreads();
 
@@ -442,7 +442,7 @@ namespace concurrent{
          * @param task
          *      The task that is to be removed from the work queue.
          *
-         * @returns true if the task was removed from the Queue.
+         * @return true if the task was removed from the Queue.
          */
         bool remove(decaf::lang::Runnable* task);
 
@@ -529,7 +529,7 @@ namespace concurrent{
         /**
          * Handler policy for tasks that are rejected upon a call to ThreadPoolExecutor::execute
          * this class will attempt to run the task in the Thread that called the execute method
-         * unless the executor is shutdown in which case the task is not run and is destroyed..
+         * unless the executor is shutdown in which case the task is not run and is destroyed.
          *
          * @since 1.0
          */
@@ -549,10 +549,10 @@ namespace concurrent{
                     return;
                 }
 
-                try{
+                try {
                     task->run();
                     delete task;
-                } catch(decaf::lang::Exception& ex) {
+                } catch (decaf::lang::Exception& ex) {
                     delete task;
                     throw ex;
                 }
@@ -583,7 +583,7 @@ namespace concurrent{
         /**
          * Handler policy for tasks that are rejected upon a call to ThreadPoolExecutor::execute
          * this class always destroys the oldest unexecuted task in the Queue and then attempts
-         * to execute the rejected task using the passed in executor..
+         * to execute the rejected task using the passed in executor.
          *
          * @since 1.0
          */
@@ -596,21 +596,20 @@ namespace concurrent{
             virtual ~DiscardOldestPolicy() {
             }
 
-            virtual void rejectedExecution( decaf::lang::Runnable* task, ThreadPoolExecutor* executer ) {
+            virtual void rejectedExecution(decaf::lang::Runnable* task, ThreadPoolExecutor* executer) {
 
                 if (executer->isShutdown()) {
                     delete task;
                     return;
                 }
 
-                try{
-
+                try {
                     decaf::lang::Runnable* oldest = NULL;
                     executer->getQueue()->poll(oldest);
                     delete oldest;
 
                     executer->execute(task);
-                } catch(decaf::lang::Exception& ex) {
+                } catch (decaf::lang::Exception& ex) {
                     delete task;
                     throw ex;
                 }

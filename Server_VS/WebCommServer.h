@@ -16,6 +16,7 @@
 #include <iostream>
 #include <memory>
 #include<QObject>
+#include<QTimer>
 using namespace activemq;
 using namespace activemq::core;
 using namespace decaf;
@@ -28,7 +29,7 @@ class WebCommServer:public QObject,public ExceptionListener,public MessageListen
 {
 	Q_OBJECT
 public:
-	WebCommServer();
+	WebCommServer(QObject *parent = nullptr);
 	~WebCommServer();
 	bool start();
    bool initialize();
@@ -36,6 +37,8 @@ public:
 	void cleanup();
 	virtual void onMessage(const Message* message);
 	virtual void onException(const CMSException& ex AMQCPP_UNUSED);
+	virtual void transportInterrupted();
+	virtual void transportResumed();
 	std::string UserName;
 	std::string Password;
 	Connection* connection;
@@ -46,8 +49,11 @@ public:
 	bool clientAck;
 	std::string brokerURI;
 	std::string destURI;
+private:
+	//运行状态
+	bool m_isRun;
 signals:
 	//通知UI读取设备参数指令
-	void NoticfyServerFacilityID(int ServiceTypeID, QString StationID, QString DeviceID, int Command, QStringList CommLst);
+	void NewWebRequest(QString UID,int FUID,int Command, QStringList CommLst);
 };
 

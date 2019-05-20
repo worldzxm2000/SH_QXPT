@@ -26,9 +26,9 @@
 #include <activemq/threads/TaskRunner.h>
 #include <decaf/lang/Pointer.h>
 
-namespace activemq{
-namespace core{
-namespace kernels{
+namespace activemq {
+namespace core {
+namespace kernels {
     class ActiveMQSessionKernel;
 }
 
@@ -151,7 +151,7 @@ namespace kernels{
         virtual bool iterate();
 
         /**
-         * @returns a vector containing all the unconsumed messages, this clears the
+         * @return a vector containing all the unconsumed messages, this clears the
          *          Message Dispatch Channel when called.
          */
         std::vector< Pointer<MessageDispatch> > getUnconsumedMessages() {

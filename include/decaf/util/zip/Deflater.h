@@ -73,7 +73,7 @@ namespace zip {
         static const int DEFLATED;
 
         /**
-         * Compression level for no compression. .
+         * Compression level for no compression.
          */
         static const int NO_COMPRESSION;
 
@@ -101,8 +101,8 @@ namespace zip {
 
     private:
 
-        Deflater( const Deflater& );
-        Deflater operator= ( const Deflater& );
+        Deflater(const Deflater&);
+        Deflater operator=(const Deflater&);
 
     public:
 
@@ -116,7 +116,7 @@ namespace zip {
          * @param nowrap
          *      If true uses GZip compatible compression (defaults to false).
          */
-        Deflater( int level, bool nowrap = false );
+        Deflater(int level, bool nowrap = false);
 
         /**
          * Creates a new compressor with the default compression level. Compressed data will be
@@ -143,7 +143,7 @@ namespace zip {
          * @throws IndexOutOfBoundsException if the offset + length > size of the buffer.
          * @throws IllegalStateException if in the end state.
          */
-        void setInput( const unsigned char* buffer, int size, int offset, int length );
+        void setInput(const unsigned char* buffer, int size, int offset, int length);
 
         /**
          * Sets input data for compression. This should be called whenever needsInput() returns
@@ -159,7 +159,7 @@ namespace zip {
          * @throws IndexOutOfBoundsException if the offset + length > size of the buffer.
          * @throws IllegalStateException if in the end state.
          */
-        void setInput( const std::vector<unsigned char>& buffer, int offset, int length );
+        void setInput(const std::vector<unsigned char>& buffer, int offset, int length);
 
         /**
          * Sets input data for compression. This should be called whenever needsInput() returns
@@ -170,7 +170,7 @@ namespace zip {
          *
          * @throws IllegalStateException if in the end state.
          */
-        void setInput( const std::vector<unsigned char>& buffer );
+        void setInput(const std::vector<unsigned char>& buffer);
 
         /**
          * Sets preset dictionary for compression. A preset dictionary is used when the
@@ -191,7 +191,7 @@ namespace zip {
          * @throws IndexOutOfBoundsException if the offset + length > size of the buffer.
          * @throws IllegalStateException if in the end state.
          */
-        void setDictionary( const unsigned char* buffer, int size, int offset, int length );
+        void setDictionary(const unsigned char* buffer, int size, int offset, int length);
 
         /**
          * Sets preset dictionary for compression. A preset dictionary is used when the
@@ -209,7 +209,7 @@ namespace zip {
          * @throws IndexOutOfBoundsException if the offset + length > size of the buffer.
          * @throws IllegalStateException if in the end state.
          */
-        void setDictionary( const std::vector<unsigned char>& buffer, int offset, int length );
+        void setDictionary(const std::vector<unsigned char>& buffer, int offset, int length);
 
         /**
          * Sets preset dictionary for compression. A preset dictionary is used when the
@@ -222,7 +222,7 @@ namespace zip {
          *
          * @throws IllegalStateException if in the end state.
          */
-        void setDictionary( const std::vector<unsigned char>& buffer );
+        void setDictionary(const std::vector<unsigned char>& buffer);
 
         /**
          * Sets the compression strategy to the specified value.
@@ -233,7 +233,7 @@ namespace zip {
          * @throws IllegalArgumentException if the strategy value is invalid.
          * @throws IllegalStateException if in the end state.
          */
-        void setStrategy( int strategy );
+        void setStrategy(int strategy);
 
         /**
          * Sets the compression level to the specified value.
@@ -244,7 +244,7 @@ namespace zip {
          * @throws IllegalArgumentException if the level value is invalid.
          * @throws IllegalStateException if in the end state.
          */
-        void setLevel( int level );
+        void setLevel(int level);
 
         /**
          * @return true if the input data buffer is empty and setInput() should be called in
@@ -277,13 +277,13 @@ namespace zip {
          * @param length
          *      The maximum number of byte of data to write.
          *
-         * @returns the actual number of bytes of compressed data.
+         * @return the actual number of bytes of compressed data.
          *
          * @throws NullPointerException if buffer is NULL.
          * @throws IndexOutOfBoundsException if the offset + length > size of the buffer.
          * @throws IllegalStateException if in the end state.
          */
-        int deflate( unsigned char* buffer, int size, int offset, int length );
+        int deflate(unsigned char* buffer, int size, int offset, int length);
 
         /**
          * Fills specified buffer with compressed data. Returns actual number of bytes of
@@ -297,12 +297,12 @@ namespace zip {
          * @param length
          *      The maximum number of byte of data to write.
          *
-         * @returns the actual number of bytes of compressed data.
+         * @return the actual number of bytes of compressed data.
          *
          * @throws IndexOutOfBoundsException if the offset + length > size of the buffer.
          * @throws IllegalStateException if in the end state.
          */
-        int deflate( std::vector<unsigned char>& buffer, int offset, int length );
+        int deflate(std::vector<unsigned char>& buffer, int offset, int length);
 
         /**
          * Fills specified buffer with compressed data. Returns actual number of bytes of
@@ -312,21 +312,21 @@ namespace zip {
          * @param buffer
          *      The Buffer to write the compressed data to.
          *
-         * @returns the actual number of bytes of compressed data.
+         * @return the actual number of bytes of compressed data.
          *
          * @throws IllegalStateException if in the end state.
          */
-        int deflate( std::vector<unsigned char>& buffer );
+        int deflate(std::vector<unsigned char>& buffer);
 
         /**
-         * @returns the ADLER-32 value of the uncompressed data.
+         * @return the ADLER-32 value of the uncompressed data.
          *
          * @throws IllegalStateException if in the end state.
          */
         long long getAdler() const;
 
         /**
-         * @returns the total number of uncompressed bytes input so far.
+         * @return the total number of uncompressed bytes input so far.
          *
          * @throws IllegalStateException if in the end state.
          */

@@ -20,6 +20,7 @@
 
 #include <decaf/util/Config.h>
 #include <decaf/lang/Number.h>
+#include <decaf/lang/String.h>
 #include <decaf/lang/Comparable.h>
 #include <string>
 #include <decaf/lang/exceptions/NumberFormatException.h>
@@ -66,8 +67,7 @@ namespace lang{
          */
         Integer(const std::string& value);
 
-        virtual ~Integer() {
-        }
+        virtual ~Integer();
 
         /**
          * Compares this Integer instance with another.
@@ -81,7 +81,7 @@ namespace lang{
 
         /**
          * @param i - the Integer object to compare against.
-         * @returns true if the two Integer Objects have the same value.
+         * @return true if the two Integer Objects have the same value.
          */
         bool equals(const Integer& i) const {
             return this->value == i.value;
@@ -118,7 +118,7 @@ namespace lang{
 
         /**
          * @param i - the Integer object to compare against.
-         * @returns true if the two Integer Objects have the same value.
+         * @return true if the two Integer Objects have the same value.
          */
         bool equals(const int& i) const {
             return this->value == i;
@@ -144,7 +144,7 @@ namespace lang{
         }
 
         /**
-         * @returns this <code>Integer</code> Object as a String Representation
+         * @return this <code>Integer</code> Object as a String Representation
          */
         std::string toString() const;
 
@@ -211,10 +211,10 @@ namespace lang{
          * character of the specified String is the minus sign. No whitespace
          * characters are permitted in the string.
          * @param value - The string to decode
-         * @returns a Integer object containing the decoded value
+         * @return a Integer object containing the decoded value
          * @throws NumberFomatException if the string is not formatted correctly.
          */
-        static Integer decode(const std::string& value);
+        static Integer decode(const String& value);
 
         /**
          * Returns the value obtained by reversing the order of the bytes in the
@@ -228,7 +228,7 @@ namespace lang{
          * Returns the value obtained by reversing the order of the bits in the
          * two's complement binary representation of the specified int  value.
          * @param value - the value whose bits are to be reversed
-         * @returns the reversed bits int.
+         * @return the reversed bits int.
          */
         static int reverse(int value);
 
@@ -255,7 +255,7 @@ namespace lang{
          * @return the int represented by the string argument in the specified radix.
          * @throws NumberFormatException - If String does not contain a parsable int.
          */
-        static int parseInt(const std::string& s, int radix);
+        static int parseInt(const String& s, int radix);
 
         /**
          * Parses the string argument as a signed decimal int. The characters
@@ -264,15 +264,21 @@ namespace lang{
          * negative value. The resulting int value is returned, exactly as if
          * the argument and the radix 10 were given as arguments to the
          * parseInteger( const std::string, int ) method.
-         * @param s - String to convert to a int
-         * @returns the converted int value
+         *
+         * @param s
+         *      String to convert to a int
+         *
+         * @return the converted int value
          * @throws NumberFormatException if the string is not a int.
          */
-        static int parseInt(const std::string& s);
+        static int parseInt(const String& s);
 
         /**
          * Returns a Integer instance representing the specified int value.
-         * @param value - the int to wrap
+         *
+         * @param value
+         *      The int to wrap in an Integer object.
+         *
          * @return the new Integer object wrapping value.
          */
         static Integer valueOf(int value) {
@@ -289,7 +295,7 @@ namespace lang{
          * @return new Integer Object wrapping the primitive
          * @throws NumberFormatException if the string is not a decimal int.
          */
-        static Integer valueOf(const std::string& value);
+        static Integer valueOf(const String& value);
 
         /**
          * Returns a Integer object holding the value extracted from the specified
@@ -303,7 +309,7 @@ namespace lang{
          * @return new Integer Object wrapping the primitive
          * @throws NumberFormatException if the string is not a valid int.
          */
-        static Integer valueOf(const std::string& value, int radix);
+        static Integer valueOf(const String& value, int radix);
 
         /**
          * Returns the number of one-bits in the two's complement binary
@@ -344,7 +350,7 @@ namespace lang{
          *
          * @param value - the int to convert to a string
          * @param radix - the radix to format the string in
-         * @returns an int formatted to the string value of the radix given.
+         * @return an int formatted to the string value of the radix given.
          */
         static std::string toString(int value, int radix);
 
@@ -365,7 +371,7 @@ namespace lang{
          * If uppercase letters are desired, the toUpperCase() method may be called
          * on the result:
          * @param value - the int to be translated to an Octal string
-         * @returns the unsigned int value as a Octal string
+         * @return the unsigned int value as a Octal string
          */
         static std::string toHexString(int value);
 
@@ -385,7 +391,7 @@ namespace lang{
          *      01234567
          *
          * @param value - the int to be translated to an Octal string
-         * @returns the unsigned int value as a Octal string
+         * @return the unsigned int value as a Octal string
          */
         static std::string toOctalString(int value);
 
@@ -404,7 +410,7 @@ namespace lang{
          * digits.
          *
          * @param value - the int to be translated to a binary string
-         * @returns the unsigned int value as a binary string
+         * @return the unsigned int value as a binary string
          */
         static std::string toBinaryString(int value);
 
@@ -512,7 +518,7 @@ namespace lang{
 
     private:
 
-        static int parse(const std::string& value, int offset, int radix, bool negative);
+        static int parse(const String& value, int offset, int radix, bool negative);
 
     };
 

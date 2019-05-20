@@ -58,19 +58,25 @@ namespace exceptions {
          * this message occurred.  Sets the message to report, using an
          * optional list of arguments to parse into the message
          *
-         * @param file The file name where exception occurs
-         * @param lineNumber The line number where the exception occurred.
-         * @param cause The exception that was the cause for this one to be thrown.
-         * @param msg The message to report
-         * @param ... list of primitives that are formatted into the message
+         * @param file
+         *      The file name where exception occurs
+         * @param lineNumber
+         *      The line number where the exception occurred.
+         * @param cause
+         *      The exception that was the cause for this one to be thrown.
+         * @param msg
+         *      The message to report
+         * @param ...
+         *      list of primitives that are formatted into the message
          */
         InvalidStateException(const char* file, const int lineNumber, const std::exception* cause, const char* msg, ...);
 
         /**
          * Constructor
          *
-         * @param cause Pointer to the exception that caused this one to
-         * be thrown, the object is cloned caller retains ownership.
+         * @param cause
+         *      Pointer to the exception that caused this one to be thrown, the
+         *      object is cloned caller retains ownership.
          */
         InvalidStateException(const std::exception* cause);
 
@@ -79,10 +85,14 @@ namespace exceptions {
          * this message occurred.  Sets the message to report, using an
          * optional list of arguments to parse into the message
          *
-         * @param file The file name where exception occurs
-         * @param lineNumber The line number where the exception occurred.
-         * @param msg The message to report
-         * @param ... list of primitives that are formatted into the message
+         * @param file
+         *      The file name where exception occurs
+         * @param lineNumber
+         *      The line number where the exception occurred.
+         * @param msg
+         *      The message to report
+         * @param ...
+         *      list of primitives that are formatted into the message
          */
         InvalidStateException(const char* file, const int lineNumber, const char* msg, ...);
 

@@ -11,6 +11,7 @@ HEADERS += ./resource.h \
     ./SimpleProducer.h \
     ./param.h \
     ./Server_VS.h \
+    ./SwitchButton.h \
     ./WebCommServer.h \
     ./SYSLogDlg.h \
     ./SrvTableWidget.h \
@@ -24,10 +25,6 @@ HEADERS += ./resource.h \
     ./CommProcess.h \
     ./ReadSYSLogTXT.h \
     ./MyButton.h \
-    ./MyDockWidgetTitle.h \
-    ./MyDockWidget.h \
-    ./MyDockWidgetTabButton.h \
-    ./MyDockWidgetTabBar.h \
     ./MQConfigDlg.h \
     ./LoadTxtThread.h \
     ./ImpDataThread.h \
@@ -46,14 +43,11 @@ SOURCES += ./CommandDlg.cpp \
     ./main.cpp \
     ./MQConfigDlg.cpp \
     ./MyButton.cpp \
-    ./MyDockWidget.cpp \
-    ./MyDockWidgetTabBar.cpp \
-    ./MyDockWidgetTabButton.cpp \
-    ./MyDockWidgetTitle.cpp \
     ./ReadSYSLogTXT.cpp \
     ./Server_VS.cpp \
     ./SimpleProducer.cpp \
     ./SrvTableWidget.cpp \
+    ./SwitchButton.cpp \
     ./SYSLogDlg.cpp \
     ./WebCommServer.cpp
 FORMS += ./server_vs.ui \

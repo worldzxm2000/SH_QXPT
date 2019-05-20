@@ -49,6 +49,7 @@ namespace commands {
     class AMQCPP_API MessageId : public BaseDataStructure, public decaf::lang::Comparable<MessageId> {
     protected:
 
+        std::string textView;
         Pointer<ProducerId> producerId;
         long long producerSequenceId;
         long long brokerSequenceId;
@@ -91,17 +92,19 @@ namespace commands {
 
         void setValue(const std::string& key);
 
-        void setTextView(const std::string& key);
+        virtual const std::string& getTextView() const;
+        virtual std::string& getTextView();
+        virtual void setTextView(const std::string& textView);
 
         virtual const Pointer<ProducerId>& getProducerId() const;
         virtual Pointer<ProducerId>& getProducerId();
-        virtual void setProducerId( const Pointer<ProducerId>& producerId );
+        virtual void setProducerId(const Pointer<ProducerId>& producerId);
 
         virtual long long getProducerSequenceId() const;
-        virtual void setProducerSequenceId( long long producerSequenceId );
+        virtual void setProducerSequenceId(long long producerSequenceId);
 
         virtual long long getBrokerSequenceId() const;
-        virtual void setBrokerSequenceId( long long brokerSequenceId );
+        virtual void setBrokerSequenceId(long long brokerSequenceId);
 
         virtual int compareTo(const MessageId& value) const;
 

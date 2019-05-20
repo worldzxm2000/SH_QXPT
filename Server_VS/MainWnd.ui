@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Server_VSClass</class>
+ <widget class="QMainWindow" name="Server_VSClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1023</width>
+    <height>533</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>气象观测要素中心站</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../Image/png/Weather.ico</normaloff>../Image/png/Weather.ico</iconset>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0  rgba(52,152,219, 255), stop:1 rgba(44, 62, 80, 255)); color:white;
+</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <widget class="QGroupBox" name="groupBox_Main">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>1024</width>
+      <height>540</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background:transparent;border-width: 2px;border-style: solid;border-color:transparent</string>
+    </property>
+    <property name="title">
+     <string/>
+    </property>
+    <widget class="QGroupBox" name="groupBox_M">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>40</y>
+       <width>191</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background:transparent;border-width: 0px;border-style: solid;border-color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <widget class="QPushButton" name="RemoveBtn">
+      <property name="geometry">
+       <rect>
+        <x>55</x>
+        <y>10</y>
+        <width>35</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>删除解析库</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/Remove.png</normaloff>../Image/png/Remove.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="SettingBtn">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>10</y>
+        <width>35</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>参数设置</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/setting.png</normaloff>../Image/png/setting.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="LogBtn">
+      <property name="geometry">
+       <rect>
+        <x>145</x>
+        <y>10</y>
+        <width>35</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>查看日志</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/log.png</normaloff>../Image/png/log.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="AddBtn">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>35</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>添加解析库</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/Add.png</normaloff>../Image/png/Add.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="NameLabel">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>10</y>
+       <width>151</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <weight>75</weight>
+       <italic>true</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background:transparent;border-width: 0px;border-style: solid;border-color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>气象观测要素中心站</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="ImageLabel">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>5</y>
+       <width>30</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background:transparent;border-width: 0px;border-style: solid;border-color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>../Image/png/weather.png</pixmap>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_C">
+     <property name="geometry">
+      <rect>
+       <x>970</x>
+       <y>5</y>
+       <width>51</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background:transparent;border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="title">
+      <string/>
+     </property>
+     <widget class="QPushButton" name="MinBtn">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>5</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>最小化</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/minus.png</normaloff>../Image/png/minus.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="CloseBtn">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>5</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>关闭</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/close.png</normaloff>../Image/png/close.png</iconset>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_F">
+     <property name="geometry">
+      <rect>
+       <x>250</x>
+       <y>100</y>
+       <width>351</width>
+       <height>400</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox{border:2px solid rgb(255,255,255);margin-top: 3ex;border-radius:5;}QGroupBox::title {subcontrol-origin: margin;subcontrol-position: top left;left:10px; margin-left: 0px;padding:0 1px;}</string>
+     </property>
+     <property name="title">
+      <string>设备列表</string>
+     </property>
+     <widget class="QListWidget" name="ClientList">
+      <property name="geometry">
+       <rect>
+        <x>15</x>
+        <y>31</y>
+        <width>321</width>
+        <height>351</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QListView {show-decoration-selected: 1;border-color:white;color:white; font:12pt}
+QListView::item {min-height:40px; border-style: none;color: white;font: 12pt '\346\226\260\345\256\213\344\275\223';}
+QListView::item:selected { border: white; border-style: solid;background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 transparent, stop:0.01 transparent,stop:0.011 rgba(46,80,108,255), stop:1 rgba(46,80,108,255));color: white;}
+QListView::item:hover {color: rgb(255,255,255);background-color:qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(255, 255, 255, 255), stop:0.01 rgba(255, 255, 255, 255),stop:0.011 #11998e, stop:1 #11998e)}</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_S">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>100</y>
+       <width>241</width>
+       <height>400</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox{border:2px solid rgb(255,255,255);margin-top: 3ex;border-radius:5;}QGroupBox::title {subcontrol-origin: margin;subcontrol-position: top left;left:10px; margin-left: 0px;padding:0 1px;}</string>
+     </property>
+     <property name="title">
+      <string>业务列表</string>
+     </property>
+     <widget class="QTableWidget" name="ServerList">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>221</width>
+        <height>341</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QTableWidget{show-decoration-selected: 1;background:transparent;color:white;border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);font-size:20px;}
+QTableWidget::item::selected{ background:rgba(46,80,108,255)}
+QTableWidget::item::hover{ background:#11998e}</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="OnLineCountLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>375</y>
+        <width>211</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>设备在线个数：0</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="StatusLabel">
+     <property name="geometry">
+      <rect>
+       <x>5</x>
+       <y>505</y>
+       <width>1014</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>系统运行正常</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_CM">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>610</x>
+       <y>100</y>
+       <width>411</width>
+       <height>401</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>微软雅黑</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox{border:2px solid rgb(255,255,255);margin-top: 3ex;border-radius:5;}QGroupBox::title {subcontrol-origin: margin;subcontrol-position: top left;left:10px; margin-left: 0px;padding:0 1px;}</string>
+     </property>
+     <property name="title">
+      <string>控制命令</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignJustify|Qt::AlignTop</set>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <widget class="QTextEdit" name="Send_textEdit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>280</y>
+        <width>291</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="HexSwitchBtn">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>310</y>
+        <width>71</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QCheckBox{background-color:transparent;border-width:0px;}
+QCheckBox:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}</string>
+      </property>
+      <property name="text">
+       <string>hex</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="SndTxtBtn">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>335</y>
+        <width>38</width>
+        <height>38</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>发送</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/send.png</normaloff>../Image/png/send.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ClearTxtBtn">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>335</y>
+        <width>38</width>
+        <height>38</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>清除</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton{background-color:transparent;border-width:0px;}
+QPushButton:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}
+QToolTip{border:0px;background:rgb(46,80,108,255);color:white}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../Image/png/clear.png</normaloff>../Image/png/clear.png</iconset>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>32</width>
+        <height>32</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QLabel" name="SndCountLabel">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>380</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>发送个数：0</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="ShowTxtSwitchBtn">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>280</y>
+        <width>91</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QCheckBox{background-color:transparent;border-width:0px;}
+QCheckBox:hover{border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);border-radius:5;}</string>
+      </property>
+      <property name="text">
+       <string>显示接收数据</string>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="RecvTxtBrower">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>21</y>
+        <width>401</width>
+        <height>251</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border-width: 2px;border-style: solid;border-color: rgb(255, 255, 255);</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+  <action name="actionDMTM">
+   <property name="text">
+    <string>补抄数据</string>
+   </property>
+   <property name="toolTip">
+    <string>补抄数据</string>
+   </property>
+  </action>
+  <action name="action1">
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="action_SYSLog">
+   <property name="text">
+    <string>系统日志</string>
+   </property>
+  </action>
+  <action name="action_DataLog">
+   <property name="text">
+    <string>数据日志</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+ <slots>
+  <slot>on_RunBtn_clicked()</slot>
+  <slot>On_SetTimeBtn_Clicked()</slot>
+  <slot>on_clientList_customContextMenuRequested(QPoint)</slot>
+ </slots>
+</ui>

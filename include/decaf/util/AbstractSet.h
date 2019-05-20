@@ -47,6 +47,8 @@ namespace util {
                         public virtual decaf::util::AbstractCollection<E> {
     public:
 
+        AbstractSet() : AbstractCollection<E>() {}
+
         virtual ~AbstractSet() {}
 
         /**
@@ -64,30 +66,29 @@ namespace util {
          * Note that this implementation will throw an UnsupportedOperationException if the
          * iterator returned by the iterator method does not implement the remove method.
          */
-            virtual bool removeAll(const Collection<E>& collection) {
+        virtual bool removeAll(const Collection<E>& collection) {
 
-                bool result = false;
-                if (this->size() <= collection.size()) {
+            bool result = false;
+            if (this->size() <= collection.size()) {
 
-                    std::auto_ptr<Iterator<E> > iter(this->iterator());
-                    while (iter->hasNext()) {
-                        if (collection.contains(iter->next())) {
-                            iter->remove();
-                            result = true;
-                        }
-                    }
-
-                } else {
-
-                    std::auto_ptr<Iterator<E> > iter(collection.iterator());
-                    while (iter->hasNext()) {
-                        result = this->remove(iter->next()) || result;
+                std::auto_ptr<Iterator<E> > iter(this->iterator());
+                while (iter->hasNext()) {
+                    if (collection.contains(iter->next())) {
+                        iter->remove();
+                        result = true;
                     }
                 }
 
-                return result;
+            } else {
+
+                std::auto_ptr<Iterator<E> > iter(collection.iterator());
+                while (iter->hasNext()) {
+                    result = this->remove(iter->next()) || result;
+                }
             }
 
+            return result;
+        }
     };
 
 }}

@@ -21,8 +21,8 @@
 #include <decaf/lang/exceptions/IllegalArgumentException.h>
 #include <decaf/nio/InvalidMarkException.h>
 
-namespace decaf{
-namespace nio{
+namespace decaf {
+namespace nio {
 
     /**
      * A container for data of a specific primitive type.
@@ -133,21 +133,21 @@ namespace nio{
 
     public:
 
-        Buffer( int capactiy );
-        Buffer( const Buffer& other );
+        Buffer(int capactiy);
+        Buffer(const Buffer& other);
         virtual ~Buffer() {}
 
     public:
 
         /**
-         * @returns this buffer's capacity.
+         * @return this buffer's capacity.
          */
         virtual int capacity() const {
             return this->_capacity;
         }
 
         /**
-         * @returns the current position in the buffer
+         * @return the current position in the buffer
          */
         virtual int position() const {
             return this->_position;
@@ -160,14 +160,14 @@ namespace nio{
          * @param newPosition
          *      The new postion in the buffer to set.
          *
-         * @returns a reference to This buffer.
+         * @return a reference to This buffer.
          *
          * @throws IllegalArgumentException if preconditions on the new pos don't hold.
          */
-        virtual Buffer& position( int newPosition );
+        virtual Buffer& position(int newPosition);
 
         /**
-         * @returns this buffers Limit
+         * @return this buffers Limit
          */
         virtual int limit() const {
             return this->_limit;
@@ -181,23 +181,23 @@ namespace nio{
          * @param newLimit
          *      The new limit value; must be no larger than this buffer's capacity.
          *
-         * @returns A reference to This buffer
+         * @return A reference to This buffer
          *
          * @throws IllegalArgumentException if preconditions on the new pos don't hold.
          */
-        virtual Buffer& limit( int newLimit );
+        virtual Buffer& limit(int newLimit);
 
         /**
          * Sets this buffer's mark at its position.
          *
-         * @returns a reference to this buffer.
+         * @return a reference to this buffer.
          */
         virtual Buffer& mark();
 
         /**
          * Resets this buffer's position to the previously-marked position.
          *
-         * @returns a reference to this buffer.
+         * @return a reference to this buffer.
          *
          * @throws InvalidMarkException - If the mark has not been set
          */
@@ -217,7 +217,7 @@ namespace nio{
          * as if it did because it will most often be used in situations in which that
          * might as well be the case.
          *
-         * @returns a reference to this buffer.
+         * @return a reference to this buffer.
          */
         virtual Buffer& clear();
 
@@ -237,7 +237,7 @@ namespace nio{
          * This method is often used in conjunction with the compact method when
          * transferring data from one place to another.
          *
-         * @returns a reference to this buffer.
+         * @return a reference to this buffer.
          */
         virtual Buffer& flip();
 
@@ -251,14 +251,14 @@ namespace nio{
          *    buf.rewind();      // Rewind buffer
          *    buf.get(array);    // Copy data into array
          *
-         * @returns a reference to this buffer.
+         * @return a reference to this buffer.
          */
         virtual Buffer& rewind();
 
         /**
          * Returns the number of elements between the current position and the limit.
          *
-         * @returns The number of elements remaining in this buffer
+         * @return The number of elements remaining in this buffer
          */
         virtual int remaining() const {
             return _limit - _position;
@@ -267,7 +267,7 @@ namespace nio{
         /**
          * Tells whether there are any elements between the current position and the limit.
          *
-         * @returns true if, and only if, there is at least one element remaining in
+         * @return true if, and only if, there is at least one element remaining in
          *          this buffer.
          */
         virtual bool hasRemaining() const {
@@ -277,7 +277,7 @@ namespace nio{
         /**
          * Tells whether or not this buffer is read-only.
          *
-         * @returns true if, and only if, this buffer is read-only.
+         * @return true if, and only if, this buffer is read-only.
          */
         virtual bool isReadOnly() const = 0;
 

@@ -74,8 +74,7 @@ namespace openssl {
 
         virtual ~OpenSSLSocket();
 
-    public:
-        // Socket Overrides.
+    public: // Socket Overrides.
 
         /**
          * {@inheritDoc}
@@ -237,7 +236,7 @@ namespace openssl {
         /**
          * Gets the number of bytes in the Socket buffer that can be read without blocking.
          *
-         * @returns the number of bytes that can be read from the Socket without blocking.
+         * @return the number of bytes that can be read from the Socket without blocking.
          *
          * @throws IOException if an I/O error occurs while performing this operation.
          */
@@ -248,6 +247,10 @@ namespace openssl {
         // Perform some additional checks on the Server's Certificate to ensure that
         // its really valid.
         void verifyServerCert(const std::string& serverName);
+
+    public:
+
+        using decaf::net::Socket::connect;
 
     };
 

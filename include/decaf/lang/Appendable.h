@@ -31,11 +31,6 @@ namespace lang {
      * must be implemented by any class whose instances are intended to receive formatted
      * output from a Formatter.
      *
-     * TODO
-     * The characters to be appended should be valid Unicode characters as described in Unicode
-     * Character Representation. Note that supplementary characters may be composed of multiple
-     * 16-bit char values.
-     *
      * Appendables are not necessarily safe for multithreaded access. Thread safety is the
      * responsibility of classes that extend and implement this interface.
      *
@@ -55,11 +50,11 @@ namespace lang {
          * @param value
          *      The character to append.
          *
-         * @returns a Reference to this Appendable
+         * @return a Reference to this Appendable
          *
          * @throws Exception if an error occurs.
          */
-        virtual Appendable& append( char value ) = 0;
+        virtual Appendable& append(char value) = 0;
 
         /**
          * Appends the specified character sequence to this Appendable.
@@ -69,11 +64,11 @@ namespace lang {
          *      If csq is NULL, then characters will be appended as if csq contained the
          *      string "null".
          *
-         * @returns a Reference to this Appendable.
+         * @return a Reference to this Appendable.
          *
          * @throws Exception if an error occurs.
          */
-        virtual Appendable& append( const CharSequence* csq ) = 0;
+        virtual Appendable& append(const CharSequence* csq) = 0;
 
         /**
          * Appends a subsequence of the specified character sequence to this Appendable.
@@ -86,13 +81,13 @@ namespace lang {
          * @param end
          *      The index of the character following the last character in the subsequence.
          *
-         * @returns a Reference to this Appendable
+         * @return a Reference to this Appendable
          *
          * @throws Exception if an error occurs.
          * @throws IndexOutOfBoundsException start is greater than end, or end is
          *         greater than csq.length()
          */
-        virtual Appendable& append( const CharSequence* csq, int start, int end ) = 0;
+        virtual Appendable& append(const CharSequence* csq, int start, int end) = 0;
 
     };
 

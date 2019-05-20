@@ -190,7 +190,7 @@ namespace logging{
         /**
          * Gets a vector containing all the handlers that this class
          * has been assigned to use.
-         * @returns a list of handlers that are used by this logger
+         * @return a list of handlers that are used by this logger
          */
         const std::list<Handler*>& getHandlers() const;
 
@@ -490,7 +490,7 @@ namespace logging{
          * by this logger. This check is based on the Loggers effective
          * level, which may be inherited from its parent.
          * @param level - a message logging level
-         * @returns true if the given message level is currently being logged.
+         * @return true if the given message level is currently being logged.
          */
         virtual bool isLoggable( const Level& level ) const;
 
@@ -521,9 +521,10 @@ namespace logging{
          * If the logger is currently enabled for the given message level
          * then the given message is forwarded to all the registered output
          * Handler objects
-         * @param level the Level to log at
+         * @param levels the Level to log at
          * @param file the message to log
          * @param line the line in the file
+         * @param message the log message
          * @param ... variable length argument to format the message string.
          */
         virtual void log( const Level& levels,

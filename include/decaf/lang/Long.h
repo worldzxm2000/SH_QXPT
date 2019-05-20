@@ -19,12 +19,13 @@
 #define _DECAF_LANG_LONG_H_
 
 #include <decaf/lang/Number.h>
+#include <decaf/lang/String.h>
 #include <decaf/lang/Comparable.h>
 #include <decaf/lang/exceptions/NumberFormatException.h>
 #include <string>
 
-namespace decaf{
-namespace lang{
+namespace decaf {
+namespace lang {
 
     class DECAF_API Long : public Number,
                            public Comparable<Long>,
@@ -62,10 +63,9 @@ namespace lang{
          *
          * @throws NumberFormatException if the string is not a a valid 64bit long.
          */
-        Long(const std::string& value);
+        Long(const String& value);
 
-        virtual ~Long() {
-        }
+        virtual ~Long();
 
         /**
          * Compares this Long instance with another.
@@ -79,7 +79,7 @@ namespace lang{
 
         /**
          * @param l - the Long object to compare against.
-         * @returns true if the two Integer Objects have the same value.
+         * @return true if the two Integer Objects have the same value.
          */
         bool equals(const Long& l) const {
             return this->value == l.value;
@@ -116,7 +116,7 @@ namespace lang{
 
         /**
          * @param l - the Long object to compare against.
-         * @returns true if the two Integer Objects have the same value.
+         * @return true if the two Integer Objects have the same value.
          */
         bool equals(const long long& l) const {
             return this->value == l;
@@ -142,7 +142,7 @@ namespace lang{
         }
 
         /**
-         * @returns this Long Object as a String Representation
+         * @return this Long Object as a String Representation
          */
         std::string toString() const;
 
@@ -218,10 +218,10 @@ namespace lang{
          * character of the specified String is the minus sign. No whitespace
          * characters are permitted in the string.
          * @param value - The string to decode
-         * @returns a Long object containing the decoded value
+         * @return a Long object containing the decoded value
          * @throws NumberFomatException if the string is not formatted correctly.
          */
-        static Long decode(const std::string& value);
+        static Long decode(const String& value);
 
         /**
          * Returns an long long value with at most a single one-bit, in the position
@@ -291,7 +291,7 @@ namespace lang{
          * @return long long value
          * @throws NumberFormatException on invalid string value
          */
-        static long long parseLong(const std::string& value);
+        static long long parseLong(const String& value);
 
         /**
          * Returns a Long object holding the value extracted from the specified
@@ -305,7 +305,7 @@ namespace lang{
          * @return long long value
          * @throws NumberFormatException on invalid string value
          */
-        static long long parseLong(const std::string& value, int radix);
+        static long long parseLong(const String& value, int radix);
 
         /**
          * Returns the value obtained by reversing the order of the bytes in the
@@ -319,7 +319,7 @@ namespace lang{
          * Returns the value obtained by reversing the order of the bits in the
          * two's complement binary representation of the specified long long value.
          * @param value - the value whose bits are to be reversed
-         * @returns the reversed bits long long.
+         * @return the reversed bits long long.
          */
         static long long reverse(long long value);
 
@@ -398,7 +398,7 @@ namespace lang{
          *
          * @param value - the long long to convert to a string
          * @param radix - the radix to format the string in
-         * @returns an long long formatted to the string value of the radix given.
+         * @return an long long formatted to the string value of the radix given.
          */
         static std::string toString(long long value, int radix);
 
@@ -419,7 +419,7 @@ namespace lang{
          * If uppercase letters are desired, the toUpperCase() method may be called
          * on the result:
          * @param value - the long long to be translated to an Octal string
-         * @returns the unsigned long long value as a Octal string
+         * @return the unsigned long long value as a Octal string
          */
         static std::string toHexString(long long value);
 
@@ -439,7 +439,7 @@ namespace lang{
          *      01234567
          *
          * @param value - the long long to be translated to an Octal string
-         * @returns the unsigned long long value as a Octal string
+         * @return the unsigned long long value as a Octal string
          */
         static std::string toOctalString(long long value);
 
@@ -456,7 +456,7 @@ namespace lang{
          * The characters '0' and '1' are used as binary
          * digits.
          * @param value - the long long to be translated to a binary string
-         * @returns the unsigned long long value as a binary string
+         * @return the unsigned long long value as a binary string
          */
         static std::string toBinaryString(long long value);
 
@@ -473,31 +473,38 @@ namespace lang{
          * Returns a Long object holding the value given by the specified
          * std::string.  The argument is interpreted as representing a signed
          * decimal long long, exactly as if the argument were given to the
-         * parseLong( std::string ) method. The result is a Integer object that
+         * parseLong( String ) method. The result is a Integer object that
          * represents the long long value specified by the string.
-         * @param value - std::string to parse as base 10
+         *
+         * @param value
+         *      String to parse as base 10
+         *
          * @return new Long Object wrapping the primitive
          * @throws NumberFormatException if the string is not a decimal long long.
          */
-        static Long valueOf(const std::string& value);
+        static Long valueOf(const String& value);
 
         /**
          * Returns a Long object holding the value extracted from the specified
          * std::string when parsed with the radix given by the second argument.
          * The first argument is interpreted as representing a signed long long in the
          * radix specified by the second argument, exactly as if the argument were
-         * given to the parseLong( std::string, int ) method. The result is a
+         * given to the parseLong(String, int) method. The result is a
          * Long object that represents the long long value specified by the string.
-         * @param value - std::string to parse as base ( radix )
-         * @param radix - base of the string to parse.
+         *
+         * @param value
+         *      String to parse as base ( radix )
+         * @param radix
+         *      base of the string to parse.
+         *
          * @return new Long Object wrapping the primitive
          * @throws NumberFormatException if the string is not a valid long long.
          */
-        static Long valueOf(const std::string& value, int radix);
+        static Long valueOf(const String& value, int radix);
 
     private:
 
-        static long long parse(const std::string& value, int offset, int radix, bool negative);
+        static long long parse(const String& value, int offset, int radix, bool negative);
 
     };
 

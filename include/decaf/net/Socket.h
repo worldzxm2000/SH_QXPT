@@ -205,7 +205,7 @@ namespace net{
          * @throws IOException Thrown if a failure occurred in the connect.
          * @throws IllegalArguementException if the timeout value is negative or the endpoint is invalid.
          */
-        virtual void connect( const std::string& host, int port );
+        virtual void connect(const std::string& host, int port);
 
         /**
          * Connects to the specified destination, with a specified timeout value.  If a connection
@@ -224,40 +224,40 @@ namespace net{
          * @throws SocketTimeoutException if the timeout for connection is exceeded.
          * @throws IllegalArguementException if the timeout value is negative or the endpoint is invalid.
          */
-        virtual void connect( const std::string& host, int port, int timeout );
+        virtual void connect(const std::string& host, int port, int timeout);
 
         /**
          * Indicates whether or not this socket is connected to am end point.
          *
-         * @returns true if connected, false otherwise.
+         * @return true if connected, false otherwise.
          */
         bool isConnected() const {
             return connected;
         }
 
         /**
-         * @returns true if the Socket has been closed.
+         * @return true if the Socket has been closed.
          */
         bool isClosed() const {
             return closed;
         }
 
         /**
-         * @returns true if this Socket has been bound to a Local address.
+         * @return true if this Socket has been bound to a Local address.
          */
         bool isBound() const {
             return bound;
         }
 
         /**
-         * @returns true if input on this Socket has been shutdown.
+         * @return true if input on this Socket has been shutdown.
          */
         bool isInputShutdown() const {
             return inputShutdown;
         }
 
         /**
-         * @returns true if output on this Socket has been shutdown.
+         * @return true if output on this Socket has been shutdown.
          */
         bool isOutputShutdown() const {
             return outputShutdown;
@@ -310,14 +310,14 @@ namespace net{
         /**
          * Returns the address to which the socket is connected.
          *
-         * @returns the remote IP address to which this socket is connected, or null if the socket is not connected.
+         * @return the remote IP address to which this socket is connected, or null if the socket is not connected.
          */
         std::string getInetAddress() const;
 
         /**
          * Gets the local address to which the socket is bound.
          *
-         * @returns the local address to which the socket is bound or InetAddress.anyLocalAddress() if the socket is not bound yet.
+         * @return the local address to which the socket is bound or InetAddress.anyLocalAddress() if the socket is not bound yet.
          */
         std::string getLocalAddress() const;
 
@@ -359,7 +359,7 @@ namespace net{
          * @throws SocketException if the operation fails.
          * @throws IllegalArgumentException if state is true and timeout is negative.
          */
-        virtual void setSoLinger( bool state, int timeout );
+        virtual void setSoLinger(bool state, int timeout);
 
         /**
          * Gets the keep alive flag for this socket, SO_KEEPALIVE.
@@ -378,7 +378,7 @@ namespace net{
          *
          * @throws SocketException if the operation fails.
          */
-        virtual void setKeepAlive( bool keepAlive );
+        virtual void setKeepAlive(bool keepAlive);
 
         /**
          * Gets the receive buffer size for this socket, SO_RCVBUF.  This is the buffer used
@@ -399,7 +399,7 @@ namespace net{
          * @throws SocketException if the operation fails.
          * @throws IllegalArgumentException if the value is zero or negative.
          */
-        virtual void setReceiveBufferSize( int size );
+        virtual void setReceiveBufferSize(int size);
 
         /**
          * Gets the reuse address flag, SO_REUSEADDR.
@@ -418,7 +418,7 @@ namespace net{
          *
          * @throws SocketException if the operation fails.
          */
-        virtual void setReuseAddress( bool reuse );
+        virtual void setReuseAddress(bool reuse);
 
         /**
          * Gets the send buffer size for this socket, SO_SNDBUF, this value is used by the platform
@@ -440,7 +440,7 @@ namespace net{
          * @throws SocketException if the operation fails.
          * @throws IllegalArgumentException if the value is zero or negative.
          */
-        virtual void setSendBufferSize( int size );
+        virtual void setSendBufferSize(int size);
 
         /**
          * Gets the timeout for socket operations, SO_TIMEOUT.
@@ -461,12 +461,12 @@ namespace net{
          * @throws SocketException Thrown if unable to set the information.
          * @throws IllegalArgumentException if the timeout value is negative.
          */
-        virtual void setSoTimeout( int timeout );
+        virtual void setSoTimeout(int timeout);
 
         /**
          * Gets the Status of the TCP_NODELAY setting for this socket.
          *
-         * @returns true if TCP_NODELAY is enabled for the socket.
+         * @return true if TCP_NODELAY is enabled for the socket.
          *
          * @throws SocketException Thrown if unable to set the information.
          */
@@ -481,7 +481,7 @@ namespace net{
          *
          * @throws SocketException Thrown if unable to set the information.
          */
-        virtual void setTcpNoDelay( bool value );
+        virtual void setTcpNoDelay(bool value);
 
         /**
          * Gets the Traffic Class setting for this Socket, sometimes referred to as Type of
@@ -490,7 +490,7 @@ namespace net{
          *
          * Refer to your platforms network documentation regarding support for this setting.
          *
-         * @returns the bitset result of querying the traffic class setting.
+         * @return the bitset result of querying the traffic class setting.
          *
          * @throws SocketException if an error is encountered while performing this operation.
          */
@@ -509,7 +509,7 @@ namespace net{
          * @throws SocketException if an error is encountered while performing this operation.
          * @throws IllegalArgumentException if the value is not in the range [0..255].
          */
-        virtual void setTrafficClass( int value );
+        virtual void setTrafficClass(int value);
 
         /**
          * Gets the value of the OOBINLINE for this socket.
@@ -528,7 +528,7 @@ namespace net{
          *
          * @throws SocketException if an error is encountered while performing this operation.
          */
-        virtual void setOOBInline( bool value );
+        virtual void setOOBInline(bool value);
 
         /**
          * Sends on byte of urgent data to the Socket.
@@ -538,10 +538,10 @@ namespace net{
          *
          * @throws IOException if an I/O error occurs while performing this operation.
          */
-        virtual void sendUrgentData( int data );
+        virtual void sendUrgentData(int data);
 
         /**
-         * @returns a string representing this Socket.
+         * @return a string representing this Socket.
          */
         virtual std::string toString() const;
 

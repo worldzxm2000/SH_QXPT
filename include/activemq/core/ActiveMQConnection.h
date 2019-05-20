@@ -32,6 +32,7 @@
 #include <activemq/core/kernels/ActiveMQProducerKernel.h>
 #include <activemq/core/kernels/ActiveMQSessionKernel.h>
 #include <decaf/util/Properties.h>
+#include <decaf/util/ArrayList.h>
 #include <decaf/util/concurrent/atomic/AtomicBoolean.h>
 #include <decaf/util/concurrent/ExecutorService.h>
 #include <decaf/lang/exceptions/UnsupportedOperationException.h>
@@ -41,8 +42,8 @@
 #include <string>
 #include <memory>
 
-namespace activemq{
-namespace core{
+namespace activemq {
+namespace core {
 
     using decaf::lang::Pointer;
 
@@ -246,7 +247,7 @@ namespace core{
          * @param message
          *      The Message that should be checked.
          *
-         * @returns true if the Message was seen before.
+         * @return true if the Message was seen before.
          */
         bool isDuplicate(Dispatcher* dispatcher, Pointer<commands::Message> message);
 
@@ -259,6 +260,14 @@ namespace core{
          *      The Message that has been received.
          */
         void rollbackDuplicate(Dispatcher* dispatcher, Pointer<commands::Message> message);
+
+        /**
+         * Removes the Audit information stored for a given MessageConsumer
+         *
+         * @param dispatcher
+         *      The Dispatcher instance that has received the Message.
+         */
+        void removeAuditedDispatcher(Dispatcher* dispatcher);
 
     public:   // Connection Interface Methods
 
@@ -390,7 +399,7 @@ namespace core{
         /**
          * Gets the pointer to the current PrefetchPolicy that is in use by this ConnectionFactory.
          *
-         * @returns a pointer to this objects PrefetchPolicy.
+         * @return a pointer to this objects PrefetchPolicy.
          */
         PrefetchPolicy* getPrefetchPolicy() const;
 
@@ -407,7 +416,7 @@ namespace core{
         /**
          * Gets the pointer to the current RedeliveryPolicy that is in use by this ConnectionFactory.
          *
-         * @returns a pointer to this objects RedeliveryPolicy.
+         * @return a pointer to this objects RedeliveryPolicy.
          */
         RedeliveryPolicy* getRedeliveryPolicy() const;
 
@@ -442,7 +451,7 @@ namespace core{
 
         /**
          * Gets if the useAsyncSend option is set
-         * @returns true if on false if not.
+         * @return true if on false if not.
          */
         bool isUseAsyncSend() const;
 
@@ -454,7 +463,7 @@ namespace core{
 
         /**
          * Gets if the Connection is configured for Message body compression.
-         * @returns if the Message body will be Compressed or not.
+         * @return if the Message body will be Compressed or not.
          */
         bool isUseCompression() const;
 
@@ -527,7 +536,7 @@ namespace core{
         void setProducerWindowSize(unsigned int windowSize);
 
         /**
-         * @returns true if the Connections that this factory creates should support the
+         * @return true if the Connections that this factory creates should support the
          * message based priority settings.
          */
         bool isMessagePrioritySupported() const;
@@ -576,7 +585,7 @@ namespace core{
          * for duplication, and the larger the performance impact of duplicate
          * detection will be.
          *
-         * @returns the configured audit depth.
+         * @return the configured audit depth.
          */
         int getAuditDepth() const;
 
@@ -594,7 +603,7 @@ namespace core{
         /**
          * The number of Producers that will be audited.
          *
-         * @returns the configured number of producers to include in the audit.
+         * @return the configured number of producers to include in the audit.
          */
         int getAuditMaximumProducerNumber() const;
 
@@ -640,7 +649,7 @@ namespace core{
          * completion.  This allows the acks to represent delivery status which can be persisted on
          * rollback Used in conjunction with KahaDB set to Rewrite On Redelivery.
          *
-         * @returns true if this option is enabled.
+         * @return true if this option is enabled.
          */
         bool isTransactedIndividualAck() const;
 
@@ -675,7 +684,7 @@ namespace core{
         /**
          * Gets the delay period for a consumer redelivery.
          *
-         * @returns configured time delay in milliseconds.
+         * @return configured time delay in milliseconds.
          */
         long long getConsumerFailoverRedeliveryWaitPeriod() const;
 
@@ -703,7 +712,7 @@ namespace core{
         /**
          * Gets the time between optimized ack batches in milliseconds.
          *
-         * @returns time between optimized ack batches in Milliseconds.
+         * @return time between optimized ack batches in Milliseconds.
          */
         long long getOptimizeAcknowledgeTimeOut() const;
 
@@ -739,7 +748,7 @@ namespace core{
         /**
          * Should all created consumers be retroactive.
          *
-         * @returns true if consumer will be created with the retroactive flag set.
+         * @return true if consumer will be created with the retroactive flag set.
          */
         bool isUseRetroactiveConsumer() const;
 
@@ -756,7 +765,7 @@ namespace core{
         /**
          * Should all created consumers be exclusive.
          *
-         * @returns true if consumer will be created with the exclusive flag set.
+         * @return true if consumer will be created with the exclusive flag set.
          */
         bool isExclusiveConsumer() const;
 
@@ -785,6 +794,38 @@ namespace core{
          *      The sendAcksAsync configuration value to set.
          */
         void setSendAcksAsync(bool sendAcksAsync);
+
+        /**
+         * @return Returns the alwaysSessionAsync configuration setting.
+         */
+        bool isAlwaysSessionAsync() const;
+
+        /**
+         * If this flag is not set then a separate thread is not used for dispatching messages
+         * for each Session in the Connection. However, a separate thread is always used if there
+         * is more than one session, or the session isn't in auto acknowledge or duplicates ok mode.
+         * By default this value is set to true and session dispatch happens asynchronously.
+         */
+        void setAlwaysSessionAsync(bool alwaysSessionAsync);
+
+        /**
+         * @return true if the consumer will skip checking messages for expiration.
+         */
+        bool isConsumerExpiryCheckEnabled();
+
+        /**
+         * Configures whether this consumer will perform message expiration processing
+         * on all incoming messages.  This feature is enabled by default.
+         *
+         * @param consumerExpiryCheckEnabled
+         *      False if the default message expiration checks should be disabled.
+         */
+        void setConsumerExpiryCheckEnabled(bool consumerExpiryCheckEnabled);
+
+        /**
+         * @return the current connection's OpenWire protocol version.
+         */
+        int getProtocolVersion() const;
 
     public: // TransportListener
 
@@ -870,7 +911,7 @@ namespace core{
          * Returns the Id of the Resource Manager that this client will use should
          * it be entered into an XA Transaction.
          *
-         * @returns a string containing the resource manager Id for XA Transactions.
+         * @return a string containing the resource manager Id for XA Transactions.
          */
         std::string getResourceManagerId() const;
 
@@ -901,7 +942,7 @@ namespace core{
          * @param timeout
          *      The time in milliseconds to wait for a response, default is zero or infinite.
          *
-         * @returns a Pointer instance to the Response object sent from the Broker.
+         * @return a Pointer instance to the Response object sent from the Broker.
          *
          * @throws BrokerException if the response from the broker is of type ExceptionResponse.
          * @throws ActiveMQException if any other error occurs while sending the Command.
@@ -937,15 +978,16 @@ namespace core{
         /**
          * Sets the pointer to the first exception that caused the Connection to become failed.
          *
-         * @param pointer to the exception instance that is to be the first failure error if the
-         *        first error is already set this value is deleted.
+         * @param error
+         *      pointer to the exception instance that is to be the first failure error if the
+         *      first error is already set this value is deleted.
          */
         void setFirstFailureError(decaf::lang::Exception* error);
 
         /**
          * Gets the pointer to the first exception that caused the Connection to become failed.
          *
-         * @returns pointer to an Exception instance or NULL if none is set.
+         * @return pointer to an Exception instance or NULL if none is set.
          */
         decaf::lang::Exception* getFirstFailureError() const;
 
@@ -985,7 +1027,7 @@ namespace core{
         void ensureConnectionInfoSent();
 
         /**
-         * @returns the ExecutorService used to run jobs for this Connection
+         * @return the ExecutorService used to run jobs for this Connection
          */
         decaf::util::concurrent::ExecutorService* getExecutor() const;
 
@@ -1030,9 +1072,17 @@ namespace core{
          * Determines whether the supplied Temporary Destination has already been deleted from the
          * Broker.  If watchTopicAdvisories is disabled this method will always return false.
          *
-         * @returns true if the temporary destination was deleted already.
+         * @return true if the temporary destination was deleted already.
          */
         bool isDeleted(Pointer<commands::ActiveMQTempDestination> destination) const;
+
+        /**
+         * Returns an ArrayList that contains a copy of all Sessions that are
+         * currently active in the Connection
+         *
+         * @return an ArrayList of Sessions active in this connection.
+         */
+        decaf::util::ArrayList< Pointer<activemq::core::kernels::ActiveMQSessionKernel> > getSessions() const;
 
     protected:
 
@@ -1052,6 +1102,9 @@ namespace core{
 
         // Allow subclasses to access the original Properties object for this connection.
         const decaf::util::Properties& getProperties() const;
+
+        // Process the WireFormatInfo command
+        void onWireFormatInfo(Pointer<commands::Command> command);
 
         // Process the ControlCommand command
         void onControlCommand(Pointer<commands::Command> command);

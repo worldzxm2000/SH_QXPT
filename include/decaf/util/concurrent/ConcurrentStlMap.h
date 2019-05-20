@@ -31,9 +31,9 @@
 #include <decaf/util/Iterator.h>
 #include <decaf/lang/Pointer.h>
 
-namespace decaf{
-namespace util{
-namespace concurrent{
+namespace decaf {
+namespace util {
+namespace concurrent {
 
     /**
      * Map template that wraps around a std::map to provide a more user-friendly
@@ -419,7 +419,7 @@ namespace concurrent{
                 return false;
             }
 
-            virtual bool contains(const MapEntry<K,V>& entry) {
+            virtual bool contains(const MapEntry<K,V>& entry) const {
                 synchronized(&this->associatedMap->mutex) {
                     if (this->associatedMap->containsKey(entry.getKey()) &&
                         this->associatedMap->get(entry.getKey()) == entry.getValue()) {
@@ -470,7 +470,7 @@ namespace concurrent{
                         __FILE__, __LINE__, "Can't remove from const collection");
             }
 
-            virtual bool contains(const MapEntry<K,V>& entry) {
+            virtual bool contains(const MapEntry<K,V>& entry) const {
                 synchronized(&this->associatedMap->mutex) {
                     if (this->associatedMap->containsKey(entry.getKey()) &&
                         this->associatedMap->get(entry.getKey()) == entry.getValue()) {
@@ -774,7 +774,6 @@ namespace concurrent{
             typename std::map<K, V, COMPARATOR>::const_iterator iter;
 
             synchronized(&mutex) {
-
                 if (!valueMap.empty()) {
                     iter = valueMap.find(key);
                     return iter != valueMap.end();
@@ -832,7 +831,6 @@ namespace concurrent{
         virtual V& get(const K& key) {
             typename std::map<K,V,COMPARATOR>::iterator iter;
             synchronized(&mutex) {
-
                 if (!valueMap.empty()) {
                     iter = valueMap.find(key);
                     if (iter != valueMap.end()) {
@@ -924,7 +922,6 @@ namespace concurrent{
         virtual V remove(const K& key) {
             V result = V();
             synchronized(&mutex) {
-
                 if (!valueMap.empty()) {
                     typename std::map<K, V, COMPARATOR>::iterator iter = valueMap.find(key);
                     if (iter == valueMap.end()) {

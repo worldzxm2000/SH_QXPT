@@ -10,6 +10,7 @@ ConfigWnd::ConfigWnd(QWidget *parent)
 	GetLocalIP();
 
 }
+
 void ConfigWnd::GetLocalIP()
 {
 	string strResult;

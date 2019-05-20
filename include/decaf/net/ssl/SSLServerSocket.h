@@ -57,7 +57,7 @@ namespace ssl {
          * @throws IOException if there is an I/O error while performing this operation.
          * @throws IllegalArgumentException if the port value is negative or greater than 65535.
          */
-        SSLServerSocket( int port );
+        SSLServerSocket(int port);
 
         /**
          * Creates a new ServerSocket bound to the specified port, if the value of port is 0, then
@@ -78,7 +78,7 @@ namespace ssl {
          * @throws IOException if there is an I/O error while performing this operation.
          * @throws IllegalArgumentException if the port value is negative or greater than 65535.
          */
-        SSLServerSocket( int port, int backlog );
+        SSLServerSocket(int port, int backlog);
 
         /**
          * Creates a new ServerSocket bound to the specified port, if the value of port is 0, then
@@ -96,13 +96,13 @@ namespace ssl {
          *      The port to bind the ServerSocket to.
          * @param backlog
          *      The the number of incoming connection attempts to queue before connections are refused.
-         * @param ifAddress
+         * @param address
          *      The IP Address to bind to on the local machine.
          *
          * @throws IOException if there is an I/O error while performing this operation.
          * @throws IllegalArgumentException if the port value is negative or greater than 65535.
          */
-        SSLServerSocket( int port, int backlog, const decaf::net::InetAddress* address );
+        SSLServerSocket(int port, int backlog, const decaf::net::InetAddress* address);
 
     public:
 
@@ -112,7 +112,7 @@ namespace ssl {
          * Gets a vector containing the names of all the cipher suites that are supported by this
          * SSLServerSocket.  Normally not all of these cipher suites will be enabled on the Socket.
          *
-         * @returns a vector containing the names of all the supported cipher suites.
+         * @return a vector containing the names of all the supported cipher suites.
          */
         virtual std::vector<std::string> getSupportedCipherSuites() const = 0;
 
@@ -120,7 +120,7 @@ namespace ssl {
          * Gets a vector containing the names of all the protocols that could be enabled for
          * this SSLServerSocket instance.
          *
-         * @returns a vector containing the names of all the supported protocols.
+         * @return a vector containing the names of all the supported protocols.
          */
         virtual std::vector<std::string> getSupportedProtocols() const = 0;
 
@@ -142,7 +142,7 @@ namespace ssl {
          *
          * @throws IllegalArgumentException if the vector is empty or one of the names is invalid.
          */
-        virtual void setEnabledCipherSuites( const std::vector<std::string>& suites ) = 0;
+        virtual void setEnabledCipherSuites(const std::vector<std::string>& suites) = 0;
 
         /**
          * Returns a vector containing the names of all the currently enabled Protocols for
@@ -162,10 +162,10 @@ namespace ssl {
          *
          * @throws IllegalArgumentException if the vector is empty or one of the names is invalid.
          */
-        virtual void setEnabledProtocols( const std::vector<std::string>& protocols ) = 0;
+        virtual void setEnabledProtocols(const std::vector<std::string>& protocols) = 0;
 
         /**
-         * @returns true if the Socket request client Authentication.
+         * @return true if the Socket request client Authentication.
          */
         virtual bool getWantClientAuth() const = 0;
 
@@ -177,10 +177,10 @@ namespace ssl {
          * @param value
          *      Whether the server socket should request client authentication.
          */
-        virtual void setWantClientAuth( bool value ) = 0;
+        virtual void setWantClientAuth(bool value) = 0;
 
         /**
-         * @returns true if the Socket requires client Authentication.
+         * @return true if the Socket requires client Authentication.
          */
         virtual bool getNeedClientAuth() const = 0;
 
@@ -192,7 +192,7 @@ namespace ssl {
          * @param value
          *      Whether the server socket should require client authentication.
          */
-        virtual void setNeedClientAuth( bool value ) = 0;
+        virtual void setNeedClientAuth(bool value) = 0;
 
     };
 

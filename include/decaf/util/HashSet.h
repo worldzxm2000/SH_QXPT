@@ -78,8 +78,7 @@ namespace util {
          * Constructs a new, empty set; the backing HashMap instance has default initial
          * capacity (16) and load factor (0.75).
          */
-        HashSet() : AbstractSet<E>(), backingMap(new HashMap<E, Set<E>*, HASHCODE>()) {
-        }
+        HashSet() : AbstractSet<E>(), backingMap(new HashMap<E, Set<E>*, HASHCODE>()) {}
 
         /**
          * Constructs a new, empty set; the backing HashMap instance has the specified initial
@@ -88,8 +87,7 @@ namespace util {
          * @param capacity
          *      The initial capacity of this HashSet.
          */
-        HashSet(int capacity) : AbstractSet<E>(), backingMap(new HashMap<E, Set<E>*, HASHCODE>(capacity)) {
-        }
+        HashSet(int capacity) : AbstractSet<E>(), backingMap(new HashMap<E, Set<E>*, HASHCODE>(capacity)) {}
 
         /**
          * Constructs a new instance of {@code HashSet} with the specified capacity
@@ -114,6 +112,26 @@ namespace util {
          *      The collection of elements to add to this HashSet.
          */
         HashSet(const Collection<E>& collection) : AbstractSet<E>(), backingMap() {
+
+            this->backingMap = new HashMap<E, Set<E>*, HASHCODE>(
+                (collection.size() < 6 ? 11 : collection.size() * 2));
+
+            decaf::lang::Pointer<Iterator<E> > iter(collection.iterator());
+            while (iter->hasNext()) {
+                this->add(iter->next());
+            }
+        }
+
+        /**
+         * Constructs a new set containing the elements in the specified HashSet.
+         *
+         * The HashMap is created with default load factor (0.75) and an initial capacity
+         * sufficient to contain the elements in the specified collection.
+         *
+         * @param collection
+         *      The collection of elements to add to this HashSet.
+         */
+        HashSet(const HashSet<E>& collection) : AbstractCollection<E>(), AbstractSet<E>(), backingMap() {
 
             this->backingMap = new HashMap<E, Set<E>*, HASHCODE>(
                 (collection.size() < 6 ? 11 : collection.size() * 2));
@@ -160,7 +178,7 @@ namespace util {
          * that (e == e2). If this set already contains the element, the call leaves the set
          * unchanged and returns false.
          *
-         * @param object
+         * @param value
          *      The object to add.
          *
          * @return true when this HashSet did not already contain the object,false otherwise.
@@ -180,26 +198,9 @@ namespace util {
         }
 
         /**
-         * Returns a new {@code HashSet} with the same elements and size as this
-         * {@code HashSet}.
-         *
-         * @return a shallow copy of this {@code HashSet}.
-         * @see java.lang.Cloneable
-         */
-//        virtual Object clone() {
-//            try {
-//                HashSet<E> clone = (HashSet<E>) super.clone();
-//                clone.backingMap = (HashMap<E, HashSet<E>>) backingMap.clone();
-//                return clone;
-//            } catch (CloneNotSupportedException e) {
-//                return null;
-//            }
-//        }
-
-        /**
          * Searches this {@code HashSet} for the specified object.
          *
-         * @param object
+         * @param value
          *            the object to search for.
          * @return {@code true} if {@code object} is an element of this
          *         {@code HashSet}, {@code false} otherwise.

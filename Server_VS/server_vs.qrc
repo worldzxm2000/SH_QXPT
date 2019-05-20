@@ -1,4 +1,4 @@
 <RCC>
-    <qresource prefix="Server_VS">
+    <qresource prefix="MainWnd">
     </qresource>
 </RCC>
