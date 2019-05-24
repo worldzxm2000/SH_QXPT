@@ -173,7 +173,10 @@ void IOCP::timerEvent(QTimerEvent * event)
 	{
 		for (int i = Sockets.count() - 1; i > -1; i--)
 		{
-			int result = ::send(Sockets[i]->Socket, "test", 5, 0);
+			QString test = "test\r\n";
+			QByteArray ba = test.toLocal8Bit();
+			char *pStr = ba.data();
+			int result = ::send(Sockets[i]->Socket,pStr, ba.count(), 0);
 			if (result < 0)
 			{
 				shutdown(Sockets.at(i)->Socket, 2);

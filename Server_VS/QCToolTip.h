@@ -18,6 +18,7 @@ public:
 	~QCToolTip();
 	void showMessage(QPoint point, FACILITYINFO *client);
 	void hide();
+	QString geteElidedText(QFont font, QString str, int MaxWidth);
 	bool WindowVisable;
 	bool MouseEnter;
 	int x0, y0, x1, y1;

@@ -8,7 +8,7 @@ ItemWidget::ItemWidget(QWidget *parent) :
 {
 
 	labelName = new QLabel(this);
-	labelName->setStyleSheet("font:20pt");
+	labelName->setStyleSheet("font:16pt");
 	horLayout = new QHBoxLayout(this);
 	horLayout->setContentsMargins(150, 2, 2, 2);
 	horLayout->addWidget(labelName);
@@ -23,6 +23,19 @@ void ItemWidget::SetClient(FACILITYINFO *client)
 	m_client = client;
 	QString StationID;
 	client->StationID.toUpper() == "NULL" ? StationID = client->DeviceID : StationID = client->StationID;
+	if (StationID.count()<=16&&StationID.count()>8)
+	{
+		labelName->setStyleSheet("font:13pt");
+	}
+	else if (StationID.count()>16)
+
+	{
+		labelName->setStyleSheet("font:8pt");
+	}
+	else
+	{
+		labelName->setStyleSheet("font:16pt");
+	}
 	labelName->setText(StationID);
 }
 

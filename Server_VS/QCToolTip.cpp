@@ -19,8 +19,8 @@ QCToolTip::~QCToolTip()
 // 显示ToolTip消息
 void QCToolTip::showMessage(QPoint point, FACILITYINFO *client) {
 
-	ui->ServerNameLabel->setText(client->ServiceName);
-	ui->StationLabel->setText(client->StationID);
+	ui->ServerNameLabel->setText(geteElidedText(ui->ServerNameLabel->font(), client->ServiceName, 60));
+	ui->StationLabel->setText(geteElidedText(ui->StationLabel->font(),client->StationID,60));
 	ui->DeviceLabel->setText(client->DeviceID);
 	client->Online == true ? ui->OnlineLabel->setText(QString::fromLocal8Bit("在线")) : ui->OnlineLabel->setText(QString::fromLocal8Bit("离线"));
 	ui->IPLabel->setText(client->IP);
@@ -46,6 +46,17 @@ void QCToolTip::showMessage(QPoint point, FACILITYINFO *client) {
 	y0 -= 100;
 	QWidget::show();
 	WindowVisable = true;
+}
+
+QString QCToolTip::geteElidedText(QFont font, QString str, int MaxWidth)
+{
+	QFontMetrics fontWidth(font);
+	int width = fontWidth.width(str);  //计算字符串宽度
+	if (width >= MaxWidth)  //当字符串宽度大于最大宽度时进行转换
+	{
+		str = fontWidth.elidedText(str, Qt::ElideRight, MaxWidth);  //右部显示省略号
+	}
+	return str;   //返回处理后的字符串
 }
 
 //tooltip进入隐藏
